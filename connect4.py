@@ -100,6 +100,7 @@ while ConnectFour.evanorodd < 43:
 		play.printer()
 		break
 	if ConnectFour.evanorodd == 42:
+		ConnectFour.gameover = True
 		print("\nThe game is drawn!")
 		play.printer()
 		break
