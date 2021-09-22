@@ -1,8 +1,12 @@
+import copy
+import random
 class ConnectFour():
 
 	turn = 0
 	evanorodd = 0
 	gameover = False
+	xwin = 0
+	owin = 0
 
 	def __init__(self):
 		self.board = [[" " for column in range(15)] for row in range(6)]
@@ -13,37 +17,55 @@ class ConnectFour():
 
 
 	def printer(self):
-		if ConnectFour.gameover == True:
+		if self.gameover == True:
 			print("\nThe final board state:")
 		else:
-			print("\nTurn {turn}.".format(turn=ConnectFour.turn))
+			print("\nTurn {turn}.".format(turn=self.turn))
 		print("\n  1   2   3   4   5   6   7")
 		for row in self.board:
 			for item in row:
 				print(item, end = " ")
 			print()
+	def available_moves(self):
+		moves = []
+		for i in range(1, 14, 2):
+			if self.board[0][i] == " ":
+				moves.append(i)
+		return moves
+		moves.clear()
 
 	def inputter(self, col_index):
-		ConnectFour.turn += 1
-		ConnectFour.evanorodd += 1
+		self.turn += 1
+		self.evanorodd += 1
 		num = col_index * 2 - 1
 		if num >=1 and num <= 13 and num % 2 != 0:
 			if self.board[0][num] == " ":
 				for i in range(5, -1, -1):
 					if self.board[i][num] == " ":
-						if ConnectFour.evanorodd % 2 != 0:
+						if self.evanorodd % 2 != 0:
 							self.board[i][num] = "X"
 							break
 						else:
 							self.board[i][num] = "O"
 							break
 			else:
-				ConnectFour.evanorodd -= 1
+				self.evanorodd -= 1
 				print("\nI'm afraid that column is full. Choose another one.")
 		else:
-			ConnectFour.evanorodd -= 1
+			self.evanorodd -= 1
 			print("\nYou need to give a column number from one to seven.")
-
+		
+	def aiinputter(self, col_index):
+		self.turn += 1
+		self.evanorodd += 1
+		for i in range(5, -1, -1):
+			if self.board[i][col_index] == " ":
+				if self.evanorodd % 2 != 0:
+					self.board[i][col_index] = "X"
+					break
+				else:
+					self.board[i][col_index] = "O"
+					break
 	def checker(self):
 		# checks vertical
 		for row in range(5, 2, -1):
@@ -51,56 +73,246 @@ class ConnectFour():
 				if self.board[row][column] == self.board[row-1][column] and self.board[row][column] == self.board[row-2][column] and self.board[row][column] == self.board[row-3][column]:
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win with a vertical connect four!")
-						ConnectFour.gameover = True
+						self.gameover = True
+						self.xwin = 1
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win with a vertical connect four!")
-						ConnectFour.gameover = True
+						self.gameover = True
+						self.owin = -1
 		# checks horizontal
 		for row in range(5, -1, -1):
 			for column in range(1, 8, 2):
 				if self.board[row][column] == self.board[row][column+2] and self.board[row][column] == self.board[row][column+4] and self.board[row][column] == self.board[row][column+6]:
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win with a horizontal connect four!")
-						ConnectFour.gameover = True
+						self.gameover = True
+						self.xwin = 1
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win with a horizontal connect four!")
-						ConnectFour.gameover = True
+						self.gameover = True
+						self.owin = -1
 		# checks diagonal going from left to right
 		for row in range(5, 2, -1):
 			for column in range(1, 8, 2):
 				if self.board[row][column] == self.board[row-1][column+2] and self.board[row][column] == self.board[row-2][column+4] and self.board[row][column] == self.board[row-3][column+6]:
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win along a positive diagonal!")
-						ConnectFour.gameover = True
+						self.gameover = True
+						self.xwin = 1
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win along a positive diagonal!")
-						ConnectFour.gameover = True
+						self.gameover = True
+						self.owin = -1
 		# checks diagonal going from right to left
 		for row in range(5, 2, -1):
 			for column in range(13, 6, -2):
 				if self.board[row][column] == self.board[row-1][column-2] and self.board[row][column] == self.board[row-2][column-4] and self.board[row][column] == self.board[row-3][column-6]:
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win along a negative diagonal!")
-						ConnectFour.gameover = True
+						self.gameover = True
+						self.xwin = 1
 					elif self.board[row][column] == "O":
 						print("The game is over! Naughts win along a negative diagonal!")
-						ConnectFour.gameover = True
+						self.gameover = True
+						self.owin = -1
 
 play = ConnectFour()
 
-while ConnectFour.evanorodd < 43:
-	play.printer()
-	try:
-		columnnumber = int(input("Enter a column number from one to seven: "))
-	except ValueError:
-		columnnumber = int(input("\nPlease give an integer!: "))
-	play.inputter(columnnumber)
-	play.checker()
-	if ConnectFour.gameover == True:
+def evaluate_board(play):
+	if play.gameover == True:
+		if play.xwin == 1:
+			return float("Inf")
+		elif play.owin == -1:
+			return -float("Inf")
+	else:
+		num_top_x = 0
+		num_top_o = 0
+		
+		#Checks two streaks along vertical lines - doesn't count if it is blocked or if a connect four wouldn't be possible due to space
+
+		for row in range(5, 2, -1):
+			for column in range(1, 14, 2):
+				if play.board[row][column] == play.board[row-1][column]:
+					if play.board[row][column] == "X" and play.board[row-2][column] != "O":
+						num_top_x += 1
+					elif play.board[row][column] == "O" and play.board[row-2][column] != "X":
+						num_top_o += 1
+		
+		#Checks three streaks along vertical lines - doesn't count if it is blocked or if a connect four wouldn't be possible due to space
+
+		for row in range(5, 2, -1):
+			for column in range(1, 14, 2):
+				if play.board[row][column] == play.board[row-1][column] and play.board[row][column] == play.board[row-2][column]:
+					if play.board[row][column] == "X" and play.board[row-3][column] != "O":
+						num_top_x += 10
+					elif play.board[row][column] == "O" and play.board[row-3][column] != "X":
+						num_top_o += 10
+
+		#checks two streaks along horizontal lines towards the right - doesn't count if it is blocked to the right or if there's a lack of space for a connect four
+		
+		for row in range(5, -1, -1):
+			for column in range(1, 8, 2):
+				if play.board[row][column] == play.board[row][column+2]:
+					if play.board[row][column] == "X" and play.board[row][column+4] != "O":
+						num_top_x += 1
+					elif play.board[row][column] == "O" and play.board[row][column+4] != "X":
+						num_top_o += 1
+
+		#checks two streaks along horizontal lines towards the left - doesn't count if it is blocked to the left or if there's a lack of space 
+
+		for row in range(5, -1, -1):
+			for column in range(13, 6, -2):
+				if play.board[row][column] == play.board[row][column-2]:
+					if play.board[row][column] == "X" and play.board[row][column-4] != "O":
+						num_top_x += 1
+					elif play.board[row][column] == "O" and play.board[row][column-4] != "X":
+						num_top_o += 1
+				
+		#checks three streaks along horizontal lines towards the right - doesn't count if it is blocked to the right of if there's a lack of space
+
+		for row in range(5, -1, -1):
+			for column in range(1, 8, 2): 	
+				if play.board[row][column] == play.board[row][column+2] and play.board[row][column] == play.board[row][column+4]:
+					if play.board[row][column] == "X" and play.board[row][column+6] != "O":
+						num_top_x += 10
+					elif play.board[row][column] == "O" and play.board[row][column+6] != "X":
+						num_top_o += 10
+		
+		#checks three streaks along horizontal lines towards the left - doesn't count if it is blocked to the left or if there's a lack of space
+
+		for row in range(5, -1, -1):
+			for column in range(13, 6, -2):
+				if play.board[row][column] == play.board[row][column-2] and play.board[row][column] == play.board[row][column-4]:
+					if play.board[row][column] == "X" and play.board[row][column-6] != "O":
+						num_top_x += 10
+					elif play.board[row][column] == "O" and play.board[row][column-6] != "X":
+						num_top_o += 10
+
+		#checks two streaks along positive diagonal lines - doesn't count if there's a lack of space
+
+		for row in range(5, 2, -1):
+			for column in range(1, 8, 2):
+				if play.board[row][column] == play.board[row-1][column+2]:
+					if play.board[row][column] == "X" and play.board[row-2][column+4] != "O":
+						num_top_x += 1
+					elif play.board[row][column] == "O" and play.board[row-2][column+4] != "X":
+						num_top_o += 1
+
+		#checks two streaks along negative diagonal lines - doesn't count if there's a lack of space
+
+ 
+				
+			
+		return num_top_x - num_top_o
+			
+def minimax(play, is_maximizing, depth, alpha, beta, evaluate_board):
+	if play.gameover == True or depth == 0:
+		return [evaluate_board(play), ""]
+	if is_maximizing == True:
+		best_value = -float("Inf")
+		moves = play.available_moves()
+		random.shuffle(moves)
+		best_move = moves[0]
+		for move in moves:
+			copied = copy.deepcopy(play)
+			copied.aiinputter(move)
+			hypothetical_value = minimax(copied, False, depth - 1, alpha, beta, evaluate_board)[0]
+			if hypothetical_value > best_value:
+				best_value = hypothetical_value
+				best_move = move
+			alpha = max(alpha, best_value)
+			if alpha >= beta:
+				break
+		return [best_value, best_move]
+	else:
+		best_value = float("Inf")
+		moves = play.available_moves()
+		random.shuffle(moves)
+		best_move = moves[0]
+		for move in moves:
+			copied = copy.deepcopy(play)
+			copied.aiinputter(move)
+			hypothetical_value = minimax(copied, True, depth -1, alpha, beta, evaluate_board)[0]
+			if hypothetical_value < best_value:
+				best_value = hypothetical_value
+				best_move = move
+			beta = min(beta, best_move)
+			if alpha >= beta:
+				break
+		return [best_value, best_move] 
+ 
+
+
+ai = input("Would you like to play against an AI? Y or N?: ")
+
+while ai.lower() != "y" and ai.lower() != "n":
+	ai = input("Please enter either Y for yes or N for no: ")
+if ai.lower() == "y":
+	while play.evanorodd < 43:
 		play.printer()
-		break
-	if ConnectFour.evanorodd == 42:
-		ConnectFour.gameover = True
-		print("\nThe game is drawn!")
+		try:
+			columnnumber = int(input("Enter a column number from one to seven: "))
+		except ValueError:
+			columnnumber = int(input("\nPlease give an integer!: "))
+		play.inputter(columnnumber)
+		play.checker()
+		if play.gameover == True:
+			play.printer()
+			break
+		if play.evanorodd == 42:
+			play.gameover = True
+			print("\nThe game is drawn!")
+			play.printer()
+			break
+elif ai.lower() == "n":
+	while play.evanorodd < 43:
 		play.printer()
-		break
+		if play.evanorodd % 2 == 0:
+			try:
+				columnnumber = int(input("Enter a column number from one to seven: "))
+			except ValueError:
+				columnnumber = int(input("\nPlease give an integer!: "))
+			play.inputter(columnnumber)
+			play.checker()
+			if play.gameover == True:
+				play.printer()
+				break
+			if play.evanorodd == 42:
+				play.gameover = True
+				print("\nThe game is drawn!")
+				play.printer()
+				break
+		
+		elif play.evanorodd % 2 != 0:
+			aimove = minimax(play, False, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
+			play.aiinputter(aimove)
+			play.checker()
+			print("\nThe ai dropped a piece in column {column}".format(column=int(aimove/2+0.5)))
+			if play.gameover == True:
+				play.printer()
+				break
+			if play.evanorodd == 42:
+				play.gameover = True
+				print("\nThe game is drawn!")
+				play.printer()
+				break
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
