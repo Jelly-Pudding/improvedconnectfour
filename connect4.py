@@ -188,7 +188,7 @@ def evaluate_board(theclass):
 		elif classer.owin == -1:
 			return -float("Inf")
 	else:
-		for row in range (5, -1, -1):
+		for row in range(5, -1, -1):
 			if classer.board[row][7] == "X":
 				num_top_x += 1
 			elif classer.board[row][7] == "O":
