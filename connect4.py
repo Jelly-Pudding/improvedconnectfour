@@ -75,10 +75,12 @@ class ConnectFour():
 						print("\nThe game is over! Crosses win with a vertical connect four!")
 						self.gameover = True
 						self.xwin = 1
+						break
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win with a vertical connect four!")
 						self.gameover = True
 						self.owin = -1
+						break
 		# checks horizontal
 		for row in range(5, -1, -1):
 			for column in range(1, 8, 2):
@@ -87,10 +89,12 @@ class ConnectFour():
 						print("\nThe game is over! Crosses win with a horizontal connect four!")
 						self.gameover = True
 						self.xwin = 1
+						break
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win with a horizontal connect four!")
 						self.gameover = True
 						self.owin = -1
+						break
 		# checks diagonal going from left to right
 		for row in range(5, 2, -1):
 			for column in range(1, 8, 2):
@@ -99,10 +103,12 @@ class ConnectFour():
 						print("\nThe game is over! Crosses win along a positive diagonal!")
 						self.gameover = True
 						self.xwin = 1
+						break
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win along a positive diagonal!")
 						self.gameover = True
 						self.owin = -1
+						break
 		# checks diagonal going from right to left
 		for row in range(5, 2, -1):
 			for column in range(13, 6, -2):
@@ -111,99 +117,136 @@ class ConnectFour():
 						print("\nThe game is over! Crosses win along a negative diagonal!")
 						self.gameover = True
 						self.xwin = 1
+						break
 					elif self.board[row][column] == "O":
 						print("The game is over! Naughts win along a negative diagonal!")
 						self.gameover = True
 						self.owin = -1
+						break
 
 play = ConnectFour()
 
-def evaluate_board(play):
-	if play.gameover == True:
-		if play.xwin == 1:
-			return float("Inf")
-		elif play.owin == -1:
-			return -float("Inf")
-	else:
-		num_top_x = 0
-		num_top_o = 0
+def evaluate_board(copied):
+	num_top_x = 0
+	num_top_o = 0
+
+	for row in range(5, 2, -1):
+		for column in range(1, 14, 2):
+			if copied.board[row][column] == copied.board[row-1][column] and copied.board[row][column] == copied.board[row-2][column] and copied.board[row][column] == copied.board[row-3][column]:
+				if copied.board[row][column] == "X":
+					return float("Inf")
+				elif copied.board[row][column] == "O":
+					return -float("Inf")
+
+	for row in range(5, -1, -1):
+		for column in range(1, 8, 2):
+			if copied.board[row][column] == copied.board[row][column+2] and copied.board[row][column] == copied.board[row][column+4] and copied.board[row][column] == copied.board[row][column+6]:
+				if copied.board[row][column] == "X":
+					return float("Inf")
+				elif copied.board[row][column] == "O":
+					return -float("Inf")		
+	
+	#Checks two streaks along vertical lines - doesn't count if it is blocked or if a connect four wouldn't be possible due to space
+
+	for row in range(5, 2, -1):
+		for column in range(1, 14, 2):
+			if copied.board[row][column] == copied.board[row-1][column]:
+				if copied.board[row][column] == "X" and copied.board[row-2][column] != "O":
+					num_top_x += 1
+				elif copied.board[row][column] == "O" and copied.board[row-2][column] != "X":
+					num_top_o += 1
 		
-		#Checks two streaks along vertical lines - doesn't count if it is blocked or if a connect four wouldn't be possible due to space
+	#Checks three streaks along vertical lines - doesn't count if it is blocked or if a connect four wouldn't be possible due to space
 
-		for row in range(5, 2, -1):
-			for column in range(1, 14, 2):
-				if play.board[row][column] == play.board[row-1][column]:
-					if play.board[row][column] == "X" and play.board[row-2][column] != "O":
-						num_top_x += 1
-					elif play.board[row][column] == "O" and play.board[row-2][column] != "X":
-						num_top_o += 1
+	for row in range(5, 2, -1):
+		for column in range(1, 14, 2):
+			if copied.board[row][column] == copied.board[row-1][column] and copied.board[row][column] == copied.board[row-2][column]:
+				if copied.board[row][column] == "X" and copied.board[row-3][column] != "O":
+					num_top_x += 5
+				elif copied.board[row][column] == "O" and copied.board[row-3][column] != "X":
+					num_top_o += 5
+
+	#checks two streaks along horizontal lines towards the right - doesn't count if it is blocked to the right or if there's a lack of space for a connect four
 		
-		#Checks three streaks along vertical lines - doesn't count if it is blocked or if a connect four wouldn't be possible due to space
+	for row in range(5, -1, -1):
+		for column in range(1, 8, 2):
+			if copied.board[row][column] == copied.board[row][column+2]:
+				if copied.board[row][column] == "X" and copied.board[row][column+4] != "O":
+					num_top_x += 1
+				elif copied.board[row][column] == "O" and copied.board[row][column+4] != "X":
+					num_top_o += 1
 
-		for row in range(5, 2, -1):
-			for column in range(1, 14, 2):
-				if play.board[row][column] == play.board[row-1][column] and play.board[row][column] == play.board[row-2][column]:
-					if play.board[row][column] == "X" and play.board[row-3][column] != "O":
-						num_top_x += 10
-					elif play.board[row][column] == "O" and play.board[row-3][column] != "X":
-						num_top_o += 10
+	#checks two streaks along horizontal lines towards the left - doesn't count if it is blocked to the left or if there's a lack of space 
 
-		#checks two streaks along horizontal lines towards the right - doesn't count if it is blocked to the right or if there's a lack of space for a connect four
-		
-		for row in range(5, -1, -1):
-			for column in range(1, 8, 2):
-				if play.board[row][column] == play.board[row][column+2]:
-					if play.board[row][column] == "X" and play.board[row][column+4] != "O":
-						num_top_x += 1
-					elif play.board[row][column] == "O" and play.board[row][column+4] != "X":
-						num_top_o += 1
-
-		#checks two streaks along horizontal lines towards the left - doesn't count if it is blocked to the left or if there's a lack of space 
-
-		for row in range(5, -1, -1):
-			for column in range(13, 6, -2):
-				if play.board[row][column] == play.board[row][column-2]:
-					if play.board[row][column] == "X" and play.board[row][column-4] != "O":
-						num_top_x += 1
-					elif play.board[row][column] == "O" and play.board[row][column-4] != "X":
-						num_top_o += 1
+	for row in range(5, -1, -1):
+		for column in range(13, 6, -2):
+			if copied.board[row][column] == copied.board[row][column-2]:
+				if copied.board[row][column] == "X" and copied.board[row][column-4] != "O":
+					num_top_x += 1
+				elif copied.board[row][column] == "O" and copied.board[row][column-4] != "X":
+					num_top_o += 1
 				
-		#checks three streaks along horizontal lines towards the right - doesn't count if it is blocked to the right of if there's a lack of space
+	#checks three streaks along horizontal lines towards the right - doesn't count if it is blocked to the right of if there's a lack of space
 
-		for row in range(5, -1, -1):
-			for column in range(1, 8, 2): 	
-				if play.board[row][column] == play.board[row][column+2] and play.board[row][column] == play.board[row][column+4]:
-					if play.board[row][column] == "X" and play.board[row][column+6] != "O":
-						num_top_x += 10
-					elif play.board[row][column] == "O" and play.board[row][column+6] != "X":
-						num_top_o += 10
+	for row in range(5, -1, -1):
+		for column in range(1, 8, 2): 	
+			if copied.board[row][column] == copied.board[row][column+2] and copied.board[row][column] == copied.board[row][column+4]:
+				if copied.board[row][column] == "X" and copied.board[row][column+6] != "O":
+					num_top_x += 5
+				elif copied.board[row][column] == "O" and copied.board[row][column+6] != "X":
+					num_top_o += 5
 		
-		#checks three streaks along horizontal lines towards the left - doesn't count if it is blocked to the left or if there's a lack of space
+	#checks three streaks along horizontal lines towards the left - doesn't count if it is blocked to the left or if there's a lack of space
 
-		for row in range(5, -1, -1):
-			for column in range(13, 6, -2):
-				if play.board[row][column] == play.board[row][column-2] and play.board[row][column] == play.board[row][column-4]:
-					if play.board[row][column] == "X" and play.board[row][column-6] != "O":
-						num_top_x += 10
-					elif play.board[row][column] == "O" and play.board[row][column-6] != "X":
-						num_top_o += 10
+	for row in range(5, -1, -1):
+		for column in range(13, 6, -2):
+			if copied.board[row][column] == copied.board[row][column-2] and copied.board[row][column] == copied.board[row][column-4]:
+				if copied.board[row][column] == "X" and copied.board[row][column-6] != "O":
+					num_top_x += 5
+				elif copied.board[row][column] == "O" and copied.board[row][column-6] != "X":
+					num_top_o += 5
 
-		#checks two streaks along positive diagonal lines - doesn't count if there's a lack of space
+	#checks two streaks along positive diagonal lines - doesn't count if it's blocked or if there's a lack of space
 
-		for row in range(5, 2, -1):
-			for column in range(1, 8, 2):
-				if play.board[row][column] == play.board[row-1][column+2]:
-					if play.board[row][column] == "X" and play.board[row-2][column+4] != "O":
-						num_top_x += 1
-					elif play.board[row][column] == "O" and play.board[row-2][column+4] != "X":
-						num_top_o += 1
+	for row in range(5, 2, -1):
+		for column in range(1, 8, 2):
+			if copied.board[row][column] == copied.board[row-1][column+2]:
+				if copied.board[row][column] == "X" and copied.board[row-2][column+4] != "O":
+					num_top_x += 1
+				elif copied.board[row][column] == "O" and copied.board[row-2][column+4] != "X":
+					num_top_o += 1
 
-		#checks two streaks along negative diagonal lines - doesn't count if there's a lack of space
+	#checks two streaks along negative diagonal lines - doesn't count if it's blocked or if there's a lack of space
+		
+	for row in range(5, 2, -1):
+		for column in range(1, 8, 2):
+			if copied.board[row][column] == copied.board[row-1][column-2]:
+				if copied.board[row][column] == "X" and copied.board[row-2][column-4] != "O":
+					num_top_x += 1
+				elif copied.board[row][column] == "O" and copied.board[row-2][column-4] != "X":
+					num_top_o += 1
 
- 
-				
+	#checks three streaks along positive diagonal lines - doesn't count if it's blocked or if there's a lack of space
+
+	for row in range(5, 2, -1):
+		for column in range(1, 8, 2):
+			if copied.board[row][column] == copied.board[row-1][column+2] and copied.board[row][column] == copied.board[row-2][column+4]:
+				if copied.board[row][column] == "X" and copied.board[row-3][column+6] != "O":
+					num_top_x += 5
+				elif copied.board[row][column] == "O" and copied.board[row-3][column+6] != "X":
+					num_top_o += 5
+
+	#checks three streaks along negative diagonal lines - doesn't count if it's blocked or if there's a lack of space
+
+	for row in range(5, 2, -1):
+		for column in range(1, 8, 2):
+			if copied.board[row][column] == copied.board[row-1][column-2] and copied.board[row][column] == copied.board[row-2][column-4]:
+				if copied.board[row][column] == "X" and copied.board[row-3][column-6] != "O":
+					num_top_x += 5
+				elif copied.board[row][column] == "O" and copied.board[row-3][column-6] != "X":
+					num_top_o += 5
 			
-		return num_top_x - num_top_o
+	return num_top_x - num_top_o
 			
 def minimax(play, is_maximizing, depth, alpha, beta, evaluate_board):
 	if play.gameover == True or depth == 0:
@@ -224,10 +267,9 @@ def minimax(play, is_maximizing, depth, alpha, beta, evaluate_board):
 			if alpha >= beta:
 				break
 		return [best_value, best_move]
-	else:
+	elif is_maximizing == False:
 		best_value = float("Inf")
 		moves = play.available_moves()
-		random.shuffle(moves)
 		best_move = moves[0]
 		for move in moves:
 			copied = copy.deepcopy(play)
