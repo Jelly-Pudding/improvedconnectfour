@@ -1,13 +1,12 @@
 import copy
 import random
 class ConnectFour():
-
 	turn = 0
 	evanorodd = 0
 	gameover = False
 	xwin = 0
 	owin = 0
-
+	
 	def __init__(self):
 		self.board = [[" " for column in range(15)] for row in range(6)]
 		for row_index, row in enumerate(self.board):
@@ -164,8 +163,10 @@ class ConnectFour():
 						self.gameover = True
 						self.owin = -1
 						break
-
-
+		# checks if everywhere is full
+		spaces_left = sum(row.count(" ") for row in self.board)
+		if spaces_left == 0:
+			self.gameover = True
 
 play = ConnectFour()
 
@@ -200,7 +201,6 @@ def evaluate_board(theclass):
 		return num_top_x - num_top_o			
 def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	classer = theclass
-	classer.aichecker()
 	if classer.gameover == True or depth == 0:
 		return [evaluate_board(classer), ""]
 	if is_maximizing == True:
