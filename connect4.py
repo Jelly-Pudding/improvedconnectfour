@@ -30,7 +30,6 @@ class ConnectFour():
 			if self.board[0][i] == " ":
 				moves.append(i)
 		return moves
-		moves.clear()
 
 	def inputter(self, col_index):
 		self.turn += 1
@@ -174,7 +173,6 @@ def evaluate_board(theclass):
 	classer = theclass
 	num_top_x = 0
 	num_top_o = 0
-	classer.aichecker()
 	if classer.xwin == 1:
 		return float("Inf")
 	elif classer.owin == -1:
@@ -201,6 +199,7 @@ def evaluate_board(theclass):
 		return num_top_x - num_top_o			
 def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	classer = theclass
+	classer.aichecker()
 	if classer.gameover == True or depth == 0:
 		return [evaluate_board(classer), ""]
 	if is_maximizing == True:
