@@ -73,12 +73,10 @@ class ConnectFour():
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win with a vertical connect four!")
 						self.gameover = True
-						self.xwin = 1
 						break
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win with a vertical connect four!")
 						self.gameover = True
-						self.owin = -1
 						break
 		# checks horizontal
 		for row in range(5, -1, -1):
@@ -87,12 +85,10 @@ class ConnectFour():
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win with a horizontal connect four!")
 						self.gameover = True
-						self.xwin = 1
 						break
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win with a horizontal connect four!")
 						self.gameover = True
-						self.owin = -1
 						break
 		# checks diagonal going from left to right
 		for row in range(5, 2, -1):
@@ -101,12 +97,10 @@ class ConnectFour():
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win along a positive diagonal!")
 						self.gameover = True
-						self.xwin = 1
 						break
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win along a positive diagonal!")
 						self.gameover = True
-						self.owin = -1
 						break
 		# checks diagonal going from right to left
 		for row in range(5, 2, -1):
@@ -115,12 +109,10 @@ class ConnectFour():
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win along a negative diagonal!")
 						self.gameover = True
-						self.xwin = 1
 						break
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win along a negative diagonal!")
 						self.gameover = True
-						self.owin = -1
 						break
 
 	def aichecker(self):
@@ -182,17 +174,29 @@ def evaluate_board(theclass):
 	num_top_x = 0
 	num_top_o = 0
 	classer.aichecker()
-	if classer.gameover == True:
-		if classer.xwin == 1:
-			return float("Inf")
-		elif classer.owin == -1:
-			return -float("Inf")
+	if classer.xwin == 1:
+		return float("Inf")
+	elif classer.owin == -1:
+		return -float("Inf")
 	else:
+		#Gives points for going in the middle
 		for row in range(5, -1, -1):
 			if classer.board[row][7] == "X":
-				num_top_x += 1
+				num_top_x += 0.75
 			elif classer.board[row][7] == "O":
-				num_top_o += 1
+				num_top_o += 0.75
+		#Gives (less) points for going in the fifth column
+		for row in range(5, -1, -1):
+			if classer.board[row][5] == "X":
+				num_top_x += 0.2
+			elif classer.board[row][5] == "O":
+				num_top_o += 0.2
+		#Points for the ninth column
+		for row in range(5, -1, -1):
+			if classer.board[row][9] == "X":
+				num_top_x += 0.2
+			elif classer.board[row][9] == "O":
+				num_top_o += 0.2
 		return num_top_x - num_top_o			
 def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	classer = theclass
@@ -256,39 +260,73 @@ if ai.lower() == "n":
 			play.printer()
 			break
 elif ai.lower() == "y":
-	while play.evanorodd < 43:
-		play.printer()
-		if play.evanorodd % 2 == 0:
-			try:
-				columnnumber = int(input("Enter a column number from one to seven: "))
-			except ValueError:
-				columnnumber = int(input("\nPlease give an integer!: "))
-			play.inputter(columnnumber)
-			play.checker()
-			if play.gameover == True:
-				play.printer()
-				break
-			if play.evanorodd == 42:
-				play.gameover = True
-				print("\nThe game is drawn!")
-				play.printer()
-				break
-		
-		elif play.evanorodd % 2 != 0:
-			aimove = minimax(play, False, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
-			play.aiinputter(aimove)
-			play.checker()
-			print("\nThe ai dropped a piece in column {column}".format(column=int(aimove/2+0.5)))
-			if play.gameover == True:
-				play.printer()
-				break
-			if play.evanorodd == 42:
-				play.gameover = True
-				print("\nThe game is drawn!")
-				play.printer()
-				break
-		
-
+	iffirst = input("Would you like to go first? Y or N?: ")
+	while iffirst.lower() != "y" and iffirst.lower() != "n":
+		iffirst = input("Please enter either Y for yes or N for no: ")
+	if iffirst.lower() == "y":	
+		while play.evanorodd < 43:
+			play.printer()
+			if play.evanorodd % 2 == 0:
+				try:
+					columnnumber = int(input("Enter a column number from one to seven: "))
+				except ValueError:
+					columnnumber = int(input("\nPlease give an integer!: "))
+				play.inputter(columnnumber)
+				play.checker()
+				if play.gameover == True:
+					play.printer()
+					break
+				if play.evanorodd == 42:
+					play.gameover = True
+					print("\nThe game is drawn!")
+					play.printer()
+					break
+			
+			elif play.evanorodd % 2 != 0:
+				aimove = minimax(play, False, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
+				play.aiinputter(aimove)
+				play.checker()
+				print("\nThe ai dropped a piece in column {column}".format(column=int(aimove/2+0.5)))
+				if play.gameover == True:
+					play.printer()
+					break
+				if play.evanorodd == 42:
+					play.gameover = True
+					print("\nThe game is drawn!")
+					play.printer()
+					break
+	if iffirst.lower() == "n": 	
+		while play.evanorodd < 43:
+			play.printer()
+			if play.evanorodd % 2 == 0:
+				aimove = minimax(play, True, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
+				play.aiinputter(aimove)
+				play.checker()
+				print("\nThe ai dropped a piece in column {column}".format(column=int(aimove/2+0.5)))
+				if play.gameover == True:
+					play.printer()
+					break
+				if play.evanorodd == 42:
+					play.gameover = True
+					print("\nThe game is drawn!")
+					play.printer()
+					break
+			elif play.evanorodd % 2 != 0:
+				try:
+					columnnumber = int(input("Enter a column number from one to seven: "))
+				except ValueError:
+					columnnumber = int(input("\nPlease give an integer!: "))
+				play.inputter(columnnumber)
+				play.checker()
+				if play.gameover == True:
+					play.printer()
+					break
+				if play.evanorodd == 42:
+					play.gameover = True
+					print("\nThe game is drawn!")
+					play.printer()
+					break				
+				
 
 
 
