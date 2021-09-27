@@ -1,5 +1,6 @@
 import copy
 import random
+import sys, os
 class ConnectFour():
 	turn = 0
 	evanorodd = 0
@@ -69,13 +70,13 @@ class ConnectFour():
 			for column in range(1, 14, 2):
 				if self.board[row][column] == self.board[row-1][column] and self.board[row][column] == self.board[row-2][column] and self.board[row][column] == self.board[row-3][column]:
 					if self.board[row][column] == "X":
+						self.gameover = True
+						self.xwin = 1
 						print("\nThe game is over! Crosses win with a vertical connect four!")
-						self.gameover = True
-						break
 					elif self.board[row][column] == "O":
-						print("\nThe game is over! Naughts win with a vertical connect four!")
 						self.gameover = True
-						break
+						self.owin = -1
+						print("\nThe game is over! Naughts win with a vertical connect four!")
 		# checks horizontal
 		for row in range(5, -1, -1):
 			for column in range(1, 8, 2):
@@ -83,11 +84,11 @@ class ConnectFour():
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win with a horizontal connect four!")
 						self.gameover = True
-						break
+						self.xwin = 1
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win with a horizontal connect four!")
 						self.gameover = True
-						break
+						self.owin = -1
 		# checks diagonal going from left to right
 		for row in range(5, 2, -1):
 			for column in range(1, 8, 2):
@@ -95,11 +96,11 @@ class ConnectFour():
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win along a positive diagonal!")
 						self.gameover = True
-						break
+						self.xwin = 1
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win along a positive diagonal!")
 						self.gameover = True
-						break
+						self.owin = -1
 		# checks diagonal going from right to left
 		for row in range(5, 2, -1):
 			for column in range(13, 6, -2):
@@ -107,65 +108,21 @@ class ConnectFour():
 					if self.board[row][column] == "X":
 						print("\nThe game is over! Crosses win along a negative diagonal!")
 						self.gameover = True
-						break
+						self.xwin = 1
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win along a negative diagonal!")
 						self.gameover = True
-						break
-
-	def aichecker(self):
-		# checks vertical
-		for row in range(5, 2, -1):
-			for column in range(1, 14, 2):
-				if self.board[row][column] == self.board[row-1][column] and self.board[row][column] == self.board[row-2][column] and self.board[row][column] == self.board[row-3][column]:
-					if self.board[row][column] == "X":
-						self.gameover = True
-						self.xwin = 1
-						break
-					elif self.board[row][column] == "O":
-						self.gameover = True
 						self.owin = -1
-						break
-		# checks horizontal
-		for row in range(5, -1, -1):
-			for column in range(1, 8, 2):
-				if self.board[row][column] == self.board[row][column+2] and self.board[row][column] == self.board[row][column+4] and self.board[row][column] == self.board[row][column+6]:
-					if self.board[row][column] == "X":
-						self.gameover = True
-						self.xwin = 1
-						break
-					elif self.board[row][column] == "O":
-						self.gameover = True
-						self.owin = -1
-						break
-		# checks diagonal going from left to right
-		for row in range(5, 2, -1):
-			for column in range(1, 8, 2):
-				if self.board[row][column] == self.board[row-1][column+2] and self.board[row][column] == self.board[row-2][column+4] and self.board[row][column] == self.board[row-3][column+6]:
-					if self.board[row][column] == "X":
-						self.gameover = True
-						self.xwin = 1
-						break
-					elif self.board[row][column] == "O":
-						self.gameover = True
-						self.owin = -1
-						break
-		# checks diagonal going from right to left
-		for row in range(5, 2, -1):
-			for column in range(13, 6, -2):
-				if self.board[row][column] == self.board[row-1][column-2] and self.board[row][column] == self.board[row-2][column-4] and self.board[row][column] == self.board[row-3][column-6]:
-					if self.board[row][column] == "X":
-						self.gameover = True
-						self.xwin = 1
-						break
-					elif self.board[row][column] == "O":
-						self.gameover = True
-						self.owin = -1
-						break
-		# checks if everywhere is full
+		#checks if everywhere is full
 		spaces_left = sum(row.count(" ") for row in self.board)
 		if spaces_left == 0:
 			self.gameover = True
+
+def blockprint():
+	sys.stdout = open(os.devnull, 'w')
+def enableprint():
+	sys.stdout = sys.__stdout__
+
 
 play = ConnectFour()
 
@@ -199,7 +156,7 @@ def evaluate_board(theclass):
 		return num_top_x - num_top_o			
 def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	classer = theclass
-	classer.aichecker()
+	classer.checker()
 	if classer.gameover == True or depth == 0:
 		return [evaluate_board(classer), ""]
 	if is_maximizing == True:
@@ -282,10 +239,12 @@ elif ai.lower() == "y":
 					break
 			
 			elif play.evanorodd % 2 != 0:
+				blockprint()
 				aimove = minimax(play, False, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
 				play.aiinputter(aimove)
+				enableprint()
+				print("\nThe ai dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 				play.checker()
-				print("\nThe ai dropped a piece in column {column}".format(column=int(aimove/2+0.5)))
 				if play.gameover == True:
 					play.printer()
 					break
@@ -298,10 +257,12 @@ elif ai.lower() == "y":
 		while play.evanorodd < 43:
 			play.printer()
 			if play.evanorodd % 2 == 0:
+				blockprint()
 				aimove = minimax(play, True, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
 				play.aiinputter(aimove)
+				enableprint()
+				print("\nThe ai dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 				play.checker()
-				print("\nThe ai dropped a piece in column {column}".format(column=int(aimove/2+0.5)))
 				if play.gameover == True:
 					play.printer()
 					break
