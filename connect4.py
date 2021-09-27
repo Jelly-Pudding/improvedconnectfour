@@ -15,8 +15,6 @@ class Unbuffered(object):
        return getattr(self.stream, attr)
 sys.stdout = Unbuffered(sys.stdout)
 
-
-
 class ConnectFour():
 	turn = 0
 	evanorodd = 0
@@ -157,22 +155,143 @@ def evaluate_board(theclass):
 		#Gives points for going in the middle
 		for row in range(5, -1, -1):
 			if classer.board[row][7] == "X":
-				num_top_x += 0.75
+				num_top_x += 3.75
 			elif classer.board[row][7] == "O":
-				num_top_o += 0.75
+				num_top_o += 3.75
 		#Gives (less) points for going in the fifth column
 		for row in range(5, -1, -1):
 			if classer.board[row][5] == "X":
-				num_top_x += 0.2
+				num_top_x += 1
 			elif classer.board[row][5] == "O":
-				num_top_o += 0.2
+				num_top_o += 1
 		#Points for the ninth column
 		for row in range(5, -1, -1):
 			if classer.board[row][9] == "X":
-				num_top_x += 0.2
+				num_top_x += 1
 			elif classer.board[row][9] == "O":
-				num_top_o += 0.2
-		return num_top_x - num_top_o			
+				num_top_o += 1	
+		return num_top_x - num_top_o
+
+def new_evaluate(theclass):
+	classer = theclass
+	num_top_x = 0
+	num_top_o = 0
+	if classer.xwin == 1:
+		return float("Inf")
+	elif classer.owin == -1:
+		return -float("Inf")
+	else:
+		#Gives points for going in the middle
+		for row in range(5, -1, -1):
+			if classer.board[row][7] == "X":
+				num_top_x += 2
+			elif classer.board[row][7] == "O":
+				num_top_o += 2
+		#Gives (less) points for going in the fifth column
+		for row in range(5, -1, -1):
+			if classer.board[row][5] == "X":
+				num_top_x += 0.5
+			elif classer.board[row][5] == "O":
+				num_top_o += 0.5
+		#Points for the ninth column
+		for row in range(5, -1, -1):
+			if classer.board[row][9] == "X":
+				num_top_x += 0.5
+			elif classer.board[row][9] == "O":
+				num_top_o += 0.5
+		x = count_streaks(classer, "X")
+		o = count_streaks(classer, "O")	
+		return (num_top_x - num_top_o) + (x - o)
+
+def count_streaks(theclass, symbol):
+	classer = theclass
+	count = 0
+	for row in range(5, -1, -1):
+		for column in range(1, 14, 2):
+			if classer.board[row][column] != symbol:
+				continue
+			#horizontal right
+			if column <= 7:
+				num_in_streak = 0
+				for i in range(0, 7, 2):
+					if classer.board[row][column + i] == symbol:
+						num_in_streak += 1
+					elif classer.board[row][column + i] != " ":
+						num_in_streak = 0
+						break
+				count += num_in_streak
+			#horizontal left
+			if column >=7:
+				num_in_streak = 0
+				for i in range(0, 7, 2):
+					if classer.board[row][column - i] == symbol:
+						num_in_streak += 1
+					elif classer.board[row][column -i] != " ":
+						num_in_streak = 0
+						break
+				count += num_in_streak
+			#up-right
+			if row >= 3 and column <=7:
+				num_in_streak = 0
+				for i in range(4):
+					if classer.board[row-i][column+i+i] == symbol:
+						num_in_streak += 1
+					elif classer.board[row-i][column+i+i] != " ":
+						num_in_streak = 0
+						break
+				count += num_in_streak
+			#down-right
+			if row <=2 and column <=7:
+				num_in_streak = 0
+				for i in range(4):
+					if classer.board[row+i][column+i+i] == symbol:
+						num_in_streak += 1
+					elif classer.board[row+i][column+i+i] != " ":
+						num_in_streak = 0
+						break
+				count += num_in_streak
+			#down-left
+			if row <=2 and column >=7:
+				num_in_streak = 0
+				for i in range(4):
+					if classer.board[row+i][column-i-i] == symbol:
+						num_in_streak += 1
+					elif classer.board[row+i][column-i-i] != " ":
+						num_in_streak = 0
+						break
+				count += num_in_streak
+			#up-left
+			if row >=3 and column >= 7:
+				num_in_streak = 0
+				for i in range(4):
+					if classer.board[row-i][column-i-i] == symbol:
+						num_in_streak += 1
+					elif classer.board[row-i][column-i-i] != " ":
+						num_in_streak = 0
+						break
+				count += num_in_streak
+			#down
+			if row <= 2:
+				num_in_streak = 0
+				for i in range(4):
+					if classer.board[row+i][column] == symbol:
+						num_in_streak += 1
+					elif classer.board[row+i][column] != " ":
+						num_in_streak = 0
+						break
+				count += num_in_streak
+			#up
+			if row<=3:
+				num_in_streak = 0
+				for i in range(4):
+					if classer.board[row-i][column] == symbol:
+						num_in_streak += 1
+					elif classer.board[row-i][column] != " ":
+						num_in_streak = 0
+						break
+				count += num_in_streak
+	return count		
+
 def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	blockprint()
 	classer = theclass
@@ -223,9 +342,9 @@ if twoai.lower() == "y":
 	while play.evanorodd < 43:
 		play.printer()
 		if play.evanorodd % 2 == 0:
-			aimove = minimax(play, True, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
+			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), evaluate_board)[1]
 			play.aiinputter(aimove)
-			print("\nai one dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
+			print("\nOld Ai dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -235,9 +354,9 @@ if twoai.lower() == "y":
 				play.printer()
 				break	
 		elif play.evanorodd % 2 != 0:
-			aimove = minimax(play, False, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
+			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
 			play.aiinputter(aimove)
-			print("\nai two dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
+			print("\nNew AI dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -290,10 +409,8 @@ elif twoai.lower() == "n":
 						break
 			
 				elif play.evanorodd % 2 != 0:
-					blockprint()
-					aimove = minimax(play, False, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
+					aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
 					play.aiinputter(aimove)
-					enableprint()
 					print("\nThe ai dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 					play.checker()
 					if play.gameover == True and play.draw != True:
@@ -307,10 +424,8 @@ elif twoai.lower() == "n":
 			while play.evanorodd < 43:
 				play.printer()
 				if play.evanorodd % 2 == 0:
-					blockprint()
-					aimove = minimax(play, True, 6, -float("Inf"), float("Inf"), evaluate_board)[1]
+					aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), evaluate_board)[1]
 					play.aiinputter(aimove)
-					enableprint()
 					print("\nThe ai dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 					play.checker()
 					if play.gameover == True and play.draw != True:
