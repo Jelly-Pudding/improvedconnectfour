@@ -344,7 +344,7 @@ if twoai.lower() == "y":
 		if play.evanorodd % 2 == 0:
 			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), evaluate_board)[1]
 			play.aiinputter(aimove)
-			print("\nOld Ai dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
+			print("\nOld AI dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -424,7 +424,7 @@ elif twoai.lower() == "n":
 			while play.evanorodd < 43:
 				play.printer()
 				if play.evanorodd % 2 == 0:
-					aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), evaluate_board)[1]
+					aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
 					play.aiinputter(aimove)
 					print("\nThe ai dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 					play.checker()
