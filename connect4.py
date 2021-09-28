@@ -203,6 +203,120 @@ def new_evaluate(theclass):
 		o = count_streaks(classer, "O")	
 		return (num_top_x - num_top_o) + (x - o)
 
+def newer_evaluate(theclass):
+	classer = theclass
+	num_top_x = 0
+	num_top_o = 0
+	if classer.xwin == 1:
+		return float("Inf")
+	elif classer.owin == -1:
+		return -float("Inf")
+	else:
+		x = count_streaks(classer, "X")
+		o = count_streaks(classer, "O")	
+		return x - o
+
+def newest_evaluate(theclass):
+	classer = theclass
+	num_top_x = 0
+	num_top_o = 0
+	if classer.xwin == 1:
+		return float("Inf")
+	elif classer.owin == -1:
+		return -float("Inf")
+	else:
+		#Gives points for going in the middle
+		for row in range(5, -1, -1):
+			if classer.board[row][7] == "X":
+				num_top_x += 4
+			elif classer.board[row][7] == "O":
+				num_top_o += 4
+		#Gives (less) points for going in the fifth column
+		for row in range(5, -1, -1):
+			if classer.board[row][5] == "X":
+				num_top_x += 2
+			elif classer.board[row][5] == "O":
+				num_top_o += 2
+		#Points for the ninth column
+		for row in range(5, -1, -1):
+			if classer.board[row][9] == "X":
+				num_top_x += 2
+			elif classer.board[row][9] == "O":
+				num_top_o += 2
+		x = count_streaks(classer, "X")
+		o = count_streaks(classer, "O")	
+		return (num_top_x - num_top_o) + (x - o)
+
+def newestest_evaluate(theclass):
+	classer = theclass
+	num_top_x = 0
+	num_top_o = 0
+	if classer.xwin == 1:
+		return float("Inf")
+	elif classer.owin == -1:
+		return -float("Inf")
+	else:
+		#Gives points for going in the middle 
+		for row in range(5, -1, -1):
+			if classer.board[row][7] == "X":
+				num_top_x += 4
+			elif classer.board[row][7] == "O":
+				num_top_o += 4
+		#Gives (less) points for going in the fifth column
+			elif classer.board[row][5] == "X":
+				num_top_x += 2
+			elif classer.board[row][5] == "O":
+				num_top_o += 2
+		#Points for the ninth column
+			elif classer.board[row][9] == "X":
+				num_top_x += 2
+			elif classer.board[row][9] == "O":
+				num_top_o += 2
+		#points for the third column
+			elif classer.board[row][3] == "X":
+				num_top_x += 0.30
+			elif classer.board[row][3] == "O":
+				num_top_o += 0.30
+		#points for the eleventh column
+			elif classer.board[row][11] == "X":
+				num_top_x += 0.30
+			elif classer.board[row][11] == "O":
+				num_top_o += 0.30
+
+		#Gives points for going near the bottom
+		for row in range(5, 2, -1):
+			#points for middle
+			if classer.board[row][7] == "X":
+				num_top_x += 50
+			elif classer.board[row][7] == "O":
+				num_top_o += 50
+			#points for fifth
+			if classer.board[row][5] == "X":
+				num_top_x += 10
+			elif classer.board[row][5] == "O":
+				num_top_o += 10
+			#points for ninth
+			if classer.board[row][9] == "X":
+				num_top_x += 10
+			elif classer.board[row][9] == "O":
+				num_top_o += 10
+			#points for the third
+			if classer.board[row][3] == "X":
+				num_top_x += 0.20
+			elif classer.board[row][3] == "O":
+				num_top_o += 0.20
+			#points for the eleventh
+			if classer.board[row][11] == "X":
+				num_top_x += 0.20
+			elif classer.board[row][11] == "O":
+				num_top_o += 0.20
+		x = count_streaks(classer, "X")
+		o = count_streaks(classer, "O")	
+		return (num_top_x - num_top_o) + (x - o)
+
+
+
+
 def count_streaks(theclass, symbol):
 	classer = theclass
 	count = 0
@@ -342,7 +456,7 @@ if twoai.lower() == "y":
 	while play.evanorodd < 43:
 		play.printer()
 		if play.evanorodd % 2 == 0:
-			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), evaluate_board)[1]
+			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
 			play.aiinputter(aimove)
 			print("\nOld AI dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
@@ -354,14 +468,14 @@ if twoai.lower() == "y":
 				play.printer()
 				break	
 		elif play.evanorodd % 2 != 0:
-			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
+			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), newestest_evaluate)[1]
 			play.aiinputter(aimove)
 			print("\nNew AI dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
 				break
-			if play.evanorodd == 42:
+			if play.draw == True:
 				print("\nThe game is drawn!")
 				play.printer()
 				break
@@ -382,7 +496,7 @@ elif twoai.lower() == "n":
 			if play.gameover == True and play.draw != True:
 				play.printer()
 				break
-			if play.evanorodd == 42:
+			if play.draw == True:
 				print("\nThe game is drawn!")
 				play.printer()
 				break
@@ -403,7 +517,7 @@ elif twoai.lower() == "n":
 					if play.gameover == True and play.draw != True:
 						play.printer()
 						break
-					if play.evanorodd == 42:
+					if play.draw == True:
 						print("\nThe game is drawn!")
 						play.printer()
 						break
@@ -416,7 +530,7 @@ elif twoai.lower() == "n":
 					if play.gameover == True and play.draw != True:
 						play.printer()
 						break
-					if play.evanorodd == 42:
+					if play.draw == True:
 						print("\nThe game is drawn!")
 						play.printer()
 						break
@@ -431,7 +545,7 @@ elif twoai.lower() == "n":
 					if play.gameover == True and play.draw != True:
 						play.printer()
 						break
-					if play.evanorodd == 42:
+					if play.draw == True:
 						print("\nThe game is drawn!")
 						play.printer()
 						break
@@ -445,7 +559,7 @@ elif twoai.lower() == "n":
 					if play.gameover == True and play.draw != True:
 						play.printer()
 						break
-					if play.evanorodd == 42:
+					if play.draw == True:
 						print("\nThe game is drawn!")
 						play.printer()
 						break				
