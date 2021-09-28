@@ -1,5 +1,4 @@
 import copy
-import random
 import sys, os
 
 class Unbuffered(object):
@@ -185,9 +184,9 @@ def new_evaluate(theclass):
 	else:
 		for row in range(5, -1, -1):
 			if classer.board[row][7] == "X":
-				num_top_x += 0.3
+				num_top_x += 0.5
 			elif classer.board[row][7] == "O":
-				num_top_o += 0.3
+				num_top_o += 0.5
 			if classer.board[row][5] == "X":
 				num_top_x += 0.1
 			elif classer.board[row][5] == "O":
@@ -205,14 +204,14 @@ def new_evaluate(theclass):
 				num_top_o += 0.3
 			#points for fifth
 			if classer.board[row][5] == "X":
-				num_top_x += 0.1
+				num_top_x += 0.2
 			elif classer.board[row][5] == "O":
-				num_top_o += 0.1
+				num_top_o += 0.2
 			#points for ninth
 			if classer.board[row][9] == "X":
-				num_top_x += 0.1
+				num_top_x += 0.2
 			elif classer.board[row][9] == "O":
-				num_top_o += 0.1
+				num_top_o += 0.2
 		x = count_streaks(classer, "X")
 		o = count_streaks(classer, "O")	
 		return (num_top_x - num_top_o) + (x - o)
@@ -308,9 +307,23 @@ def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	if is_maximizing == True:
 		best_value = -float("Inf")
 		moves = classer.available_moves()
-		random.shuffle(moves)
-		best_move = moves[0]
-		for move in moves:
+		centredmoves = []
+		if 7 in moves:
+			centredmoves.append(7)
+		if 5 in moves:
+			centredmoves.append(5)
+		if 11 in moves:
+			centredmoves.append(11)
+		if 3 in moves:
+			centredmoves.append(3)
+		if 9 in moves:
+			centredmoves.append(9)
+		if 1 in moves:
+			centredmoves.append(1)
+		if 13 in moves:
+			centredmoves.append(13)
+		best_move = centredmoves[0]
+		for move in centredmoves:
 			copied = copy.deepcopy(classer)
 			copied.aiinputter(move)
 			hypothetical_value = minimax(copied, False, depth - 1, alpha, beta, evaluate_board)[0]
@@ -325,9 +338,23 @@ def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	elif is_maximizing == False:
 		best_value = float("Inf")
 		moves = classer.available_moves()
-		random.shuffle(moves)
-		best_move = moves[0]
-		for move in moves:
+		centredmoves = []
+		if 7 in moves:
+			centredmoves.append(7)
+		if 5 in moves:
+			centredmoves.append(5)
+		if 11 in moves:
+			centredmoves.append(11)
+		if 3 in moves:
+			centredmoves.append(3)
+		if 9 in moves:
+			centredmoves.append(9)
+		if 1 in moves:
+			centredmoves.append(1)
+		if 13 in moves:
+			centredmoves.append(13)
+		best_move = centredmoves[0]
+		for move in centredmoves:
 			copied = copy.deepcopy(classer)
 			copied.aiinputter(move)
 			hypothetical_value = minimax(copied, True, depth -1, alpha, beta, evaluate_board)[0]
@@ -349,9 +376,9 @@ if twoai.lower() == "y":
 	while play.evanorodd < 43:
 		play.printer()
 		if play.evanorodd % 2 == 0:
-			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), old_evaluate)[1]
+			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
 			play.aiinputter(aimove)
-			print("\nOld AI dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
+			print("\nNew AI dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
