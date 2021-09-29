@@ -129,7 +129,7 @@ class ConnectFour():
 						self.owin = -1
 		#checks if everywhere is full
 		spaces_left = sum(row.count(" ") for row in self.board)
-		if spaces_left == 0:
+		if spaces_left == 0 and self.xwin != 1 and self.owin != -1:
 			self.draw = True
 			self.gameover = True
 
@@ -215,6 +215,66 @@ def new_evaluate(theclass):
 		x = count_streaks(classer, "X")
 		o = count_streaks(classer, "O")	
 		return (num_top_x - num_top_o) + (x - o)
+
+def newest_evaluate(theclass):
+	classer = theclass
+	num_top_x = 0
+	num_top_o = 0
+	for row in range(5, -1, -1):
+		if classer.board[row][7] == "X":
+			num_top_x += 0.2
+		elif classer.board[row][7] == "O":
+			num_top_o += 0.2
+		if classer.board[row][5] == "X":
+			num_top_x += 0.05
+		elif classer.board[row][5] == "O":
+			num_top_o += 0.05
+		if classer.board[row][9] == "X":
+			num_top_x += 0.05
+		elif classer.board[row][9] == "O":
+			num_top_o += 0.05
+	#Gives points for going near the bottom and middle
+	for row in range(5, 2, -1):
+		#points for middle
+		if classer.board[row][7] == "X":
+			num_top_x += 0.2
+		elif classer.board[row][7] == "O":
+			num_top_o += 0.05
+		#points for fifth
+		if classer.board[row][5] == "X":
+			num_top_x += 0.05
+		elif classer.board[row][5] == "O":
+			num_top_o += 0.05
+		#points for ninth
+		if classer.board[row][9] == "X":
+			num_top_x += 0.05
+		elif classer.board[row][9] == "O":
+			num_top_o += 0.05
+	for row in range(5, 2, -1):
+		for column in range(5, 10, 2):
+			if classer.board[row][column] == classer.board[row][column+2]:
+				if classer.board[row][column] == "X" and classer.board[row][column+4] == " ":
+					num_top_x += 2
+				elif classer.board[row][column] == "O" and classer.board[row][column+4] == " ":
+					num_top_o += 2
+			if classer.board[row][column] == classer.board[row][column-2]:
+				if classer.board[row][column] == "X" and classer.board[row][column-4] == " ":
+					num_top_x += 2
+				elif classer.board[row][column] == "O" and classer.board[row][column-4] == " ":
+					num_top_o += 2
+			if classer.board[row][column] == classer.board[row-1][column-2]:
+				if classer.board[row][column] == "X" and classer.board[row-2][column-4] == " ":
+					num_top_x += 0.5
+				elif classer.board[row][column] == "O" and classer.board[row-2][column-4] == " ":
+					num_top_o += 0.5
+			if classer.board[row][column] == classer.board[row-1][column+2]:
+				if classer.board[row][column] == "X" and classer.board[row-2][column+4] == " ":
+					num_top_x += 0.5
+				elif classer.board[row][column] == "O" and classer.board[row-2][column+4] == " ":
+					num_top_o += 0.5
+	x = count_streaks(classer, "X")
+	o = count_streaks(classer, "O")	
+	return (num_top_x - num_top_o) + (x - o)
 
 
 
@@ -303,7 +363,15 @@ def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	classer = theclass
 	classer.checker()
 	if classer.gameover == True or depth == 0:
-		return [evaluate_board(classer), ""]
+		if classer.gameover == True:
+			if classer.xwin == 1:
+				return [float("Inf"), ""]
+			elif classer.owin == -1:
+				return [-float("Inf"), ""]
+			elif classer.draw == True:
+				return [0, ""]
+		elif depth == 0:
+			return [evaluate_board(classer), ""]
 	if is_maximizing == True:
 		best_value = -float("Inf")
 		moves = classer.available_moves()
@@ -376,9 +444,9 @@ if twoai.lower() == "y":
 	while play.evanorodd < 43:
 		play.printer()
 		if play.evanorodd % 2 == 0:
-			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
+			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), newest_evaluate)[1]
 			play.aiinputter(aimove)
-			print("\nNew AI dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
+			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -388,9 +456,9 @@ if twoai.lower() == "y":
 				play.printer()
 				break	
 		elif play.evanorodd % 2 != 0:
-			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
+			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), old_evaluate)[1]
 			play.aiinputter(aimove)
-			print("\nNew AI dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
+			print("\nOld AI with depth 6 dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -443,7 +511,7 @@ elif twoai.lower() == "n":
 						break
 			
 				elif play.evanorodd % 2 != 0:
-					aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
+					aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), newest_evaluate)[1]
 					play.aiinputter(aimove)
 					print("\nThe ai dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 					play.checker()
@@ -458,7 +526,7 @@ elif twoai.lower() == "n":
 			while play.evanorodd < 43:
 				play.printer()
 				if play.evanorodd % 2 == 0:
-					aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
+					aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), newest_evaluate)[1]
 					play.aiinputter(aimove)
 					print("\nThe ai dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 					play.checker()
