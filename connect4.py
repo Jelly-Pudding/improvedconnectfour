@@ -87,10 +87,12 @@ class ConnectFour():
 						self.gameover = True
 						self.xwin = 1
 						print("\nThe game is over! Crosses win with a vertical connect four!")
+						return
 					elif self.board[row][column] == "O":
 						self.gameover = True
 						self.owin = -1
 						print("\nThe game is over! Naughts win with a vertical connect four!")
+						return
 		# checks horizontal
 		for row in range(5, -1, -1):
 			for column in range(1, 8, 2):
@@ -99,10 +101,12 @@ class ConnectFour():
 						print("\nThe game is over! Crosses win with a horizontal connect four!")
 						self.gameover = True
 						self.xwin = 1
+						return
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win with a horizontal connect four!")
 						self.gameover = True
 						self.owin = -1
+						return
 		# checks diagonal going from left to right
 		for row in range(5, 2, -1):
 			for column in range(1, 8, 2):
@@ -111,10 +115,12 @@ class ConnectFour():
 						print("\nThe game is over! Crosses win along a positive diagonal!")
 						self.gameover = True
 						self.xwin = 1
+						return
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win along a positive diagonal!")
 						self.gameover = True
 						self.owin = -1
+						return
 		# checks diagonal going from right to left
 		for row in range(5, 2, -1):
 			for column in range(13, 6, -2):
@@ -123,10 +129,12 @@ class ConnectFour():
 						print("\nThe game is over! Crosses win along a negative diagonal!")
 						self.gameover = True
 						self.xwin = 1
+						return
 					elif self.board[row][column] == "O":
 						print("\nThe game is over! Naughts win along a negative diagonal!")
 						self.gameover = True
 						self.owin = -1
+						return
 		#checks if everywhere is full
 		spaces_left = sum(row.count(" ") for row in self.board)
 		if spaces_left == 0 and self.xwin != 1 and self.owin != -1:
@@ -277,8 +285,6 @@ def newest_evaluate(theclass):
 	return (num_top_x - num_top_o) + (x - o)
 
 
-
-
 def count_streaks(theclass, symbol):
 	classer = theclass
 	count = 0
@@ -365,9 +371,9 @@ def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	if classer.gameover == True or depth == 0:
 		if classer.gameover == True:
 			if classer.xwin == 1:
-				return [float("Inf"), ""]
+				return [(10000000 - classer.turn), ""]
 			elif classer.owin == -1:
-				return [-float("Inf"), ""]
+				return [(-10000000 + classer.turn), ""]
 			elif classer.draw == True:
 				return [0, ""]
 		elif depth == 0:
@@ -456,7 +462,7 @@ if twoai.lower() == "y":
 				play.printer()
 				break	
 		elif play.evanorodd % 2 != 0:
-			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), old_evaluate)[1]
+			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
 			play.aiinputter(aimove)
 			print("\nOld AI with depth 6 dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
