@@ -84,14 +84,14 @@ class ConnectFour():
 			for column in range(1, 14, 2):
 				if self.board[row][column] == self.board[row-1][column] and self.board[row][column] == self.board[row-2][column] and self.board[row][column] == self.board[row-3][column]:
 					if self.board[row][column] == "X":
+						print("\nThe game is over! Crosses win with a vertical connect four!")
 						self.gameover = True
 						self.xwin = 1
-						print("\nThe game is over! Crosses win with a vertical connect four!")
 						return
 					elif self.board[row][column] == "O":
+						print("\nThe game is over! Naughts win with a vertical connect four!")
 						self.gameover = True
 						self.owin = -1
-						print("\nThe game is over! Naughts win with a vertical connect four!")
 						return
 		# checks horizontal
 		for row in range(5, -1, -1):
@@ -284,6 +284,113 @@ def newest_evaluate(theclass):
 	o = count_streaks(classer, "O")	
 	return (num_top_x - num_top_o) + (x - o)
 
+def beast(theclass):
+	classer = theclass
+	num_top_x = 0
+	num_top_o = 0
+	for row in range(5, -1, -1):
+		if classer.board[row][7] == "X":
+			num_top_x += 0.1
+		elif classer.board[row][7] == "O":
+			num_top_o += 0.1
+		if classer.board[row][5] == "X":
+			num_top_x += 0.05
+		elif classer.board[row][5] == "O":
+			num_top_o += 0.05
+		if classer.board[row][9] == "X":
+			num_top_x += 0.05
+		elif classer.board[row][9] == "O":
+			num_top_o += 0.05
+	#Gives points for going near the bottom and middle
+	for row in range(5, 2, -1):
+		#points for middle
+		if classer.board[row][7] == "X":
+			num_top_x += 0.06
+		elif classer.board[row][7] == "O":
+			num_top_o += 0.06
+		#points for fifth
+		if classer.board[row][5] == "X":
+			num_top_x += 0.01
+		elif classer.board[row][5] == "O":
+			num_top_o += 0.01
+		#points for ninth
+		if classer.board[row][9] == "X":
+			num_top_x += 0.01
+		elif classer.board[row][9] == "O":
+			num_top_o += 0.01
+	for row in range(4, 1, -1):
+		for column in range(1, 14, 2):
+			if column !=9 and column != 11 and column != 13:
+				if classer.board[row][column] == classer.board[row][column+2]:
+					if classer.board[row][column] == "X" and row == 4:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "X":
+							num_top_x += 5
+					elif classer.board[row][column] == "O" and row == 4:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "O":
+							num_top_o += 5
+		
+			if column !=5 and column != 3 and column != 1:
+				if classer.board[row][column] == classer.board[row][column-2]:
+					if classer.board[row][column] == "X" and row == 4:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "X":
+							num_top_x += 5
+					elif classer.board[row][column] == "O" and row == 4:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "O":
+							num_top_o += 5
+			if column !=9 and column !=11 and column != 13:
+				if classer.board[row][column] == classer.board[row][column+2]:
+					if classer.board[row][column] == "X" and row == 3:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "X":
+							num_top_x += 2
+					elif classer.board[row][column] == "O" and row == 3:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "O":
+							num_top_o += 2
+
+			if column != 1 and column != 3 and column !=5:
+				if classer.board[row][column] == classer.board[row][column-2]:
+					if classer.board[row][column] == "X" and row == 3:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "X":
+							num_top_x += 2
+					elif classer.board[row][column] == "O" and row == 3:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "O":
+							num_top_o += 2
+
+
+			if column !=9 and column != 11 and column != 13:
+				if classer.board[row][column] == classer.board[row][column+2]:
+					if classer.board[row][column] == "X" and row == 2:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "X":
+							num_top_x += 1
+					elif classer.board[row][column] == "O" and row == 2:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "O":
+							num_top_o += 1
+
+			if column != 1 and column != 3 and column != 5:
+				if classer.board[row][column] == classer.board[row][column-2]:
+					if classer.board[row][column] == "X" and row == 2:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "X":
+							num_top_x += 1
+					elif classer.board[row][column] == "O" and row == 2:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "O":
+							num_top_o += 1
+	for row in range(5, 2, -1):
+		for column in range(5, 10, 2):
+			if classer.board[row][column] == classer.board[row-1][column-2]:
+				if classer.board[row][column] == "X" and classer.board[row-2][column-4] == " ":
+					num_top_x += 1
+				elif classer.board[row][column] == "O" and classer.board[row-2][column-4] == " ":
+					num_top_o += 1
+			if classer.board[row][column] == classer.board[row-1][column+2]:
+				if classer.board[row][column] == "X" and classer.board[row-2][column+4] == " ":
+					num_top_x += 1
+				elif classer.board[row][column] == "O" and classer.board[row-2][column+4] == " ":
+					num_top_o += 1
+
+
+	x = count_streaks(classer, "X")
+	o = count_streaks(classer, "O")	
+	return (num_top_x - num_top_o) + (x - o)
+
 
 def count_streaks(theclass, symbol):
 	classer = theclass
@@ -450,7 +557,7 @@ if twoai.lower() == "y":
 	while play.evanorodd < 43:
 		play.printer()
 		if play.evanorodd % 2 == 0:
-			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), newest_evaluate)[1]
+			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), beast)[1]
 			play.aiinputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
@@ -462,7 +569,7 @@ if twoai.lower() == "y":
 				play.printer()
 				break	
 		elif play.evanorodd % 2 != 0:
-			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), new_evaluate)[1]
+			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), old_evaluate)[1]
 			play.aiinputter(aimove)
 			print("\nOld AI with depth 6 dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
