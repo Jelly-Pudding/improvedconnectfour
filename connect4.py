@@ -14,6 +14,72 @@ class Unbuffered(object):
        return getattr(self.stream, attr)
 sys.stdout = Unbuffered(sys.stdout)
 
+def get_position_mask_bitmap(board):
+	position, mask = '', ''
+	# Start with right-most column
+	for j in range(13, 0, -2):
+		mask += "0"
+		position += "0"        
+		# Start with bottom row
+		for i in range(5, -1, -1):
+			if board[i][j] == "X" or board[i][j] == "O":
+				mask += "1"
+			elif board[i][j] == " ":
+				mask += "0"
+			if board[i][j] == "X":
+				position += "1"
+			else:
+				position += "0"
+	one = int(position, 2)
+	two = int(mask, 2)
+	return one, two
+
+def connected_four(position):
+	global xwinner
+	global owinner
+	xwinner = 0
+	owinner = 0 
+	#horizontal check  
+	crosses = position[0]
+	mask = position[1]
+	naughts = crosses ^ mask
+	bitmaps = [crosses, naughts]
+	for maps in bitmaps:
+		# Horizontal check
+		m = maps & (maps >> 7)
+		if m & (m >> 14):
+			if maps == crosses:
+				xwinner = 1
+			elif maps == naughts:
+				owinner = -1
+			return True
+		# Diagonal \
+		m = maps & (maps >> 6)
+		if m & (m >> 12):
+			if maps == crosses:
+				xwinner = 1
+			elif maps == naughts:
+				owinner = -1
+			return True
+		# Diagonal /
+		m = maps & (maps >> 8)
+		if m & (m >> 16):
+			if maps == crosses:
+				xwinner = 1
+			elif maps == naughts:
+				owinner = -1
+			return True
+    		# Vertical
+		m = maps & (maps >> 1)
+		if m & (m >> 2):
+			if maps == crosses:
+				xwinner = 1
+			elif maps == naughts:
+				owinner = -1
+			return True
+	# Nothing found
+	return False   
+
 class ConnectFour():
 	turn = 0
 	evanorodd = 0
@@ -149,6 +215,113 @@ def enableprint():
 
 
 play = ConnectFour()
+
+def new_beast(theclass):
+	classer = theclass
+	num_top_x = 0
+	num_top_o = 0
+	for row in range(5, -1, -1):
+		if classer.board[row][7] == "X":
+			num_top_x += 0.1
+		elif classer.board[row][7] == "O":
+			num_top_o += 0.1
+		if classer.board[row][5] == "X":
+			num_top_x += 0.05
+		elif classer.board[row][5] == "O":
+			num_top_o += 0.05
+		if classer.board[row][9] == "X":
+			num_top_x += 0.05
+		elif classer.board[row][9] == "O":
+			num_top_o += 0.05
+	#Gives points for going near the bottom and middle
+	for row in range(5, 2, -1):
+		#points for middle
+		if classer.board[row][7] == "X":
+			num_top_x += 0.06
+		elif classer.board[row][7] == "O":
+			num_top_o += 0.06
+		#points for fifth
+		if classer.board[row][5] == "X":
+			num_top_x += 0.01
+		elif classer.board[row][5] == "O":
+			num_top_o += 0.01
+		#points for ninth
+		if classer.board[row][9] == "X":
+			num_top_x += 0.01
+		elif classer.board[row][9] == "O":
+			num_top_o += 0.01
+	for row in range(4, 1, -1):
+		for column in range(1, 14, 2):
+			if column !=9 and column != 11 and column != 13:
+				if classer.board[row][column] == classer.board[row][column+2]:
+					if classer.board[row][column] == "X" and row == 4:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "X":
+							num_top_x += 4
+					elif classer.board[row][column] == "O" and row == 4:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "O":
+							num_top_o += 4
+		
+			if column !=5 and column != 3 and column != 1:
+				if classer.board[row][column] == classer.board[row][column-2]:
+					if classer.board[row][column] == "X" and row == 4:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "X":
+							num_top_x += 4
+					elif classer.board[row][column] == "O" and row == 4:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "O":
+							num_top_o += 4
+			if column !=9 and column !=11 and column != 13:
+				if classer.board[row][column] == classer.board[row][column+2]:
+					if classer.board[row][column] == "X" and row == 3:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "X":
+							num_top_x += 2
+					elif classer.board[row][column] == "O" and row == 3:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "O":
+							num_top_o += 2
+
+			if column != 1 and column != 3 and column !=5:
+				if classer.board[row][column] == classer.board[row][column-2]:
+					if classer.board[row][column] == "X" and row == 3:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "X":
+							num_top_x += 2
+					elif classer.board[row][column] == "O" and row == 3:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "O":
+							num_top_o += 2
+
+
+			if column !=9 and column != 11 and column != 13:
+				if classer.board[row][column] == classer.board[row][column+2]:
+					if classer.board[row][column] == "X" and row == 2:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "X":
+							num_top_x += 1
+					elif classer.board[row][column] == "O" and row == 2:
+						if classer.board[row][column+4] == " " or classer.board[row][column+4] == "O":
+							num_top_o += 1
+
+			if column != 1 and column != 3 and column != 5:
+				if classer.board[row][column] == classer.board[row][column-2]:
+					if classer.board[row][column] == "X" and row == 2:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "X":
+							num_top_x += 1
+					elif classer.board[row][column] == "O" and row == 2:
+						if classer.board[row][column-4] == " " or classer.board[row][column-4] == "O":
+							num_top_o += 1
+	for row in range(5, 2, -1):
+		for column in range(5, 10, 2):
+			if classer.board[row][column] == classer.board[row-1][column-2]:
+				if classer.board[row][column] == "X" and classer.board[row-2][column-4] == " ":
+					num_top_x += 1
+				elif classer.board[row][column] == "O" and classer.board[row-2][column-4] == " ":
+					num_top_o += 1
+			if classer.board[row][column] == classer.board[row-1][column+2]:
+				if classer.board[row][column] == "X" and classer.board[row-2][column+4] == " ":
+					num_top_x += 1
+				elif classer.board[row][column] == "O" and classer.board[row-2][column+4] == " ":
+					num_top_o += 1
+
+
+	x = count_streaks(classer, "X")
+	o = count_streaks(classer, "O")	
+	return (num_top_x - num_top_o) + (x - o)
 
 def old_evaluate(theclass):
 	classer = theclass
@@ -474,15 +647,14 @@ def count_streaks(theclass, symbol):
 def minimax(theclass, is_maximizing, depth, alpha, beta, evaluate_board):
 	blockprint()
 	classer = theclass
-	classer.checker()
-	if classer.gameover == True or depth == 0:
-		if classer.gameover == True:
-			if classer.xwin == 1:
+	bitted = get_position_mask_bitmap(classer.board)
+	connected = connected_four(bitted)
+	if connected == True or depth == 0:
+		if connected == True:
+			if xwinner == 1:
 				return [(10000000 - classer.turn), ""]
-			elif classer.owin == -1:
+			elif owinner == -1:
 				return [(-10000000 + classer.turn), ""]
-			elif classer.draw == True:
-				return [0, ""]
 		elif depth == 0:
 			return [evaluate_board(classer), ""]
 	if is_maximizing == True:
@@ -557,7 +729,7 @@ if twoai.lower() == "y":
 	while play.evanorodd < 43:
 		play.printer()
 		if play.evanorodd % 2 == 0:
-			aimove = minimax(play, True, 5, -float("Inf"), float("Inf"), beast)[1]
+			aimove = minimax(play, True, 6, -float("Inf"), float("Inf"), beast)[1]
 			play.aiinputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
@@ -569,7 +741,7 @@ if twoai.lower() == "y":
 				play.printer()
 				break	
 		elif play.evanorodd % 2 != 0:
-			aimove = minimax(play, False, 5, -float("Inf"), float("Inf"), old_evaluate)[1]
+			aimove = minimax(play, False, 6, -float("Inf"), float("Inf"), beast)[1]
 			play.aiinputter(aimove)
 			print("\nOld AI with depth 6 dropped a piece in column {column}.".format(column=int(aimove/2+0.5)))
 			play.checker()
