@@ -6,6 +6,7 @@ class Bitboard:
 	xwin = 0
 	owin = 0
 	gameover = False
+	draw = False
 
 	def __init__(self, board):
 		self.oldboard = board
@@ -106,8 +107,16 @@ class Bitboard:
 					self.owin = -1
 				self.gameover = True
 				return
-		# Nothing found
-		return False   
+		#checks for the draw
+		one = self.mask & (1 << 5)
+                two = self.mask & (1 << 12)
+                three = self.mask & (1 << 19)
+                four = self.mask & (1 << 26)
+                five = self.mask & (1 << 33)
+                six = self.mask & (1 << 40)
+                seven = self.mask & (1 << 47)
+		if one != 0 and two != 0 and three != 0 and four != 0 and five != 0 and six != 0 and seven != 0:
+			self.draw = True
 
 class ConnectFour():
 	turn = 0
@@ -240,14 +249,15 @@ play = ConnectFour()
 
 def minimax(theclass, is_maximizing, depth, alpha, beta):
 	theclass.connected_four()
-	if theclass.gameover == True or depth == 0:
-		if theclass.gameover== True:
-			if theclass.xwin == 1:
-				return [(10000000 - theclass.turn), ""]
-			elif theclass.owin == -1:
-				return [(-10000000 + theclass.turn), ""]
-		elif depth == 0:
-			return [0, ""]
+	if theclass.gameover == True:
+		if theclass.xwin == 1:
+			return [(10000000 - theclass.turn), ""]
+		elif theclass.owin == -1:
+			return [(-10000000 + theclass.turn), ""]
+	elif theclass.draw == True:
+		return [0, ""]
+	elif depth == 0:
+		return [0, ""]
 	if is_maximizing == True:
 		best_value = -float("Inf")
 		moves = theclass.available_moves()
@@ -266,7 +276,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			centredmoves.append(1)
 		if 7 in moves:
 			centredmoves.append(7)
-		best_move = centredmoves[0]
+		best_move = centredmoves[0]	
 		for move in centredmoves:
 			copied = copy.deepcopy(theclass)
 			copied.make_move(move-1)
@@ -322,7 +332,7 @@ if twoai.lower() == "y":
 		if play.evanorodd % 2 == 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
-			aimove = minimax(bitted, True, 5, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, True, 6, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
@@ -336,7 +346,7 @@ if twoai.lower() == "y":
 		elif play.evanorodd % 2 != 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
-			aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, False, 6, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
