@@ -1,6 +1,20 @@
 import copy
 import sys, os
 
+class Unbuffered(object):
+   def __init__(self, stream):
+       self.stream = stream
+   def write(self, data):
+       self.stream.write(data)
+       self.stream.flush()
+   def writelines(self, datas):
+       self.stream.writelines(datas)
+       self.stream.flush()
+   def __getattr__(self, attr):
+       return getattr(self.stream, attr)
+sys.stdout = Unbuffered(sys.stdout)
+
+
 class Bitboard:
 	turn = 0
 	xwin = 0
@@ -13,11 +27,9 @@ class Bitboard:
 
 	def get_position_and_mask(self):
 		self.position, self.mask = '', ''
-		# Start with right-most column
 		for j in range(13, 0, -2):
 			self.mask += "0"
 			self.position += "0"        
-			# Start with top row
 			for i in range(0, 6, 1):
 				if self.oldboard[i][j] == "X" or self.oldboard[i][j] == "O":
 					self.mask += "1"
@@ -109,12 +121,12 @@ class Bitboard:
 				return
 		#checks for the draw
 		one = self.mask & (1 << 5)
-                two = self.mask & (1 << 12)
-                three = self.mask & (1 << 19)
-                four = self.mask & (1 << 26)
-                five = self.mask & (1 << 33)
-                six = self.mask & (1 << 40)
-                seven = self.mask & (1 << 47)
+		two = self.mask & (1 << 12)
+		three = self.mask & (1 << 19)
+		four = self.mask & (1 << 26)
+		five = self.mask & (1 << 33)
+		six = self.mask & (1 << 40)
+		seven = self.mask & (1 << 47)
 		if one != 0 and two != 0 and three != 0 and four != 0 and five != 0 and six != 0 and seven != 0:
 			self.draw = True
 
@@ -332,7 +344,7 @@ if twoai.lower() == "y":
 		if play.evanorodd % 2 == 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
-			aimove = minimax(bitted, True, 6, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, True, 7, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
@@ -346,7 +358,7 @@ if twoai.lower() == "y":
 		elif play.evanorodd % 2 != 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
-			aimove = minimax(bitted, False, 6, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, False, 3, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
