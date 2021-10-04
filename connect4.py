@@ -297,6 +297,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 		return [0, ""]
 	if is_maximizing == True:
 		best_value = -float("Inf")
+		alpha = -float("Inf")
 		moves = theclass.available_moves()
 		centredmoves = []
 		if 4 in moves:
@@ -328,6 +329,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 		return [best_value, best_move]
 	elif is_maximizing == False:
 		best_value = float("Inf")
+		beta = float("Inf")
 		moves = theclass.available_moves()
 		centredmoves = []
 		if 4 in moves:
@@ -371,7 +373,7 @@ if twoai.lower() == "y":
 		if play.evanorodd % 2 == 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
-			aimove = minimax(bitted, True, 7, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, True, 9, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
@@ -385,7 +387,7 @@ if twoai.lower() == "y":
 		elif play.evanorodd % 2 != 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
-			aimove = minimax(bitted, False, 7, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, False, 3, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
@@ -442,7 +444,7 @@ elif twoai.lower() == "n":
 				elif play.evanorodd % 2 != 0:
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
-					aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
+					aimove = minimax(bitted, False, 8, -float("Inf"), float("Inf"))[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
@@ -484,8 +486,6 @@ elif twoai.lower() == "n":
 						print("\nThe game is drawn!")
 						play.printer()
 						break	
-
-
 
 
 
