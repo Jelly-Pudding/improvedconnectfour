@@ -284,6 +284,8 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			return [transposition_dictionary[h][0], transposition_dictionary[h][1]] 
 		if transposition_dictionary[h][0] <= alpha:
 			return [transposition_dictionary[h][0], transposition_dictionary[h][1]]
+		if alpha < transposition_dictionary[h][0] and transposition_dictionary[h][0] < beta:
+			return [transposition_dictionary[h][0], transposition_dictionary[h][1]]
 		alpha = max(alpha, transposition_dictionary[h][0])
 		beta = min(beta, transposition_dictionary[h][0]) 
 	if theclass.gameover == True:
@@ -297,7 +299,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 		return [0, ""]
 	if is_maximizing == True:
 		best_value = -float("Inf")
-		alpha = -float("Inf")
+		a = -float("Inf")
 		moves = theclass.available_moves()
 		centredmoves = []
 		if 4 in moves:
@@ -318,18 +320,18 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 		for move in centredmoves:
 			copied = copy.deepcopy(theclass)
 			copied.make_move(move-1)
-			hypothetical_value = minimax(copied, False, depth - 1, alpha, beta)[0]
+			hypothetical_value = minimax(copied, False, depth - 1, a, beta)[0]
 			if hypothetical_value > best_value:
 				best_value = hypothetical_value
 				best_move = move
 			alpha = max(alpha, best_value)
 			if alpha >= beta:
 				break
-		transposition_dictionary[h] = [best_value, best_move]
+			transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move]
 	elif is_maximizing == False:
 		best_value = float("Inf")
-		beta = float("Inf")
+		b = float("Inf")
 		moves = theclass.available_moves()
 		centredmoves = []
 		if 4 in moves:
@@ -350,14 +352,14 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 		for move in centredmoves:
 			copied = copy.deepcopy(theclass)
 			copied.make_move(move-1)
-			hypothetical_value = minimax(copied, True, depth -1, alpha, beta)[0]
+			hypothetical_value = minimax(copied, True, depth -1, alpha, b)[0]
 			if hypothetical_value < best_value:
 				best_value = hypothetical_value
 				best_move = move
 			beta = min(beta, best_move)
 			if alpha >= beta:
 				break
-		transposition_dictionary[h] = [best_value, best_move]
+			transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move] 
 
 	
@@ -373,7 +375,7 @@ if twoai.lower() == "y":
 		if play.evanorodd % 2 == 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
-			aimove = minimax(bitted, True, 9, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, True, 5, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
@@ -387,7 +389,7 @@ if twoai.lower() == "y":
 		elif play.evanorodd % 2 != 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
-			aimove = minimax(bitted, False, 3, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
@@ -444,7 +446,7 @@ elif twoai.lower() == "n":
 				elif play.evanorodd % 2 != 0:
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
-					aimove = minimax(bitted, False, 8, -float("Inf"), float("Inf"))[1]
+					aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
@@ -461,7 +463,7 @@ elif twoai.lower() == "n":
 				if play.evanorodd % 2 == 0:
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
-					aimove = minimax(bitted, True, 7, -float("Inf"), float("Inf"))[1]
+					aimove = minimax(bitted, True, 5, -float("Inf"), float("Inf"))[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
@@ -485,7 +487,4 @@ elif twoai.lower() == "n":
 					elif play.draw == True:
 						print("\nThe game is drawn!")
 						play.printer()
-						break	
-
-
-
+						break
