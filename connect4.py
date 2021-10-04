@@ -290,16 +290,16 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 		beta = min(beta, transposition_dictionary[h][0]) 
 	if theclass.gameover == True:
 		if theclass.xwin == 1:
-			return [(10000000 - theclass.turn), ""]
+			return [(10000000 * 4 * 5) / theclass.turn, ""]
 		elif theclass.owin == -1:
-			return [(-10000000 + theclass.turn), ""]
+			return [(-10000000 * 4 * 5) / theclass.turn, ""]
 	elif theclass.draw == True:
 		return [0, ""]
 	elif depth == 0:
 		return [0, ""]
 	if is_maximizing == True:
-		best_value = -float("Inf")
 		a = -float("Inf")
+		best_value = -float("Inf")
 		moves = theclass.available_moves()
 		centredmoves = []
 		if 4 in moves:
@@ -327,7 +327,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			alpha = max(alpha, best_value)
 			if alpha >= beta:
 				break
-			transposition_dictionary[h] = [best_value, best_move]
+		transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move]
 	elif is_maximizing == False:
 		best_value = float("Inf")
@@ -359,7 +359,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			beta = min(beta, best_move)
 			if alpha >= beta:
 				break
-			transposition_dictionary[h] = [best_value, best_move]
+		transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move] 
 
 	
@@ -446,7 +446,7 @@ elif twoai.lower() == "n":
 				elif play.evanorodd % 2 != 0:
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
-					aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
+					aimove = minimax(bitted, False, 7, -float("Inf"), float("Inf"))[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
