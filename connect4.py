@@ -1,5 +1,22 @@
 import copy
 import sys, os
+import random
+random.seed(42)
+
+transposition_dictionary = {}
+
+transposition_table = [[random.randrange(1,2**64 - 1) for cell in range(0, 50, 1)] for pieces in range(0,2,1)]
+
+def compute_hash(mask, position):
+	player1 = position
+	player2 = position ^ mask
+	h = 0
+	for i in range(0, 50, 1):
+		if player1 & (1 << i):
+			h = h ^ transposition_table[0][i]
+		elif player2 & (1 << i):
+			h = h ^ transposition_table[1][i]			
+	return h              
 
 class Unbuffered(object):
    def __init__(self, stream):
@@ -261,6 +278,14 @@ play = ConnectFour()
 
 def minimax(theclass, is_maximizing, depth, alpha, beta):
 	theclass.connected_four()
+	h = compute_hash(theclass.mask, theclass.position)
+	if h in transposition_dictionary:
+		if transposition_dictionary[h][0] >= beta:
+			return [transposition_dictionary[h][0], transposition_dictionary[h][1]] 
+		if transposition_dictionary[h][0] <= alpha:
+			return [transposition_dictionary[h][0], transposition_dictionary[h][1]]
+		alpha = max(alpha, transposition_dictionary[h][0])
+		beta = min(beta, transposition_dictionary[h][0]) 
 	if theclass.gameover == True:
 		if theclass.xwin == 1:
 			return [(10000000 - theclass.turn), ""]
@@ -299,6 +324,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			alpha = max(alpha, best_value)
 			if alpha >= beta:
 				break
+		transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move]
 	elif is_maximizing == False:
 		best_value = float("Inf")
@@ -329,6 +355,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			beta = min(beta, best_move)
 			if alpha >= beta:
 				break
+		transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move] 
 
 	
@@ -358,7 +385,7 @@ if twoai.lower() == "y":
 		elif play.evanorodd % 2 != 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
-			aimove = minimax(bitted, False, 3, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, False, 7, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
@@ -432,7 +459,7 @@ elif twoai.lower() == "n":
 				if play.evanorodd % 2 == 0:
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
-					aimove = minimax(bitted, True, 5, -float("Inf"), float("Inf"))[1]
+					aimove = minimax(bitted, True, 7, -float("Inf"), float("Inf"))[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
