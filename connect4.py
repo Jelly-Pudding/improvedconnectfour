@@ -43,20 +43,27 @@ class Bitboard:
 		self.oldboard = board
 
 	def get_position_and_mask(self):
-		self.position, self.mask = '', ''
+		self.position_one, self.position_two, self.mask = "", "", "" 
 		for j in range(13, 0, -2):
+			#creates the hidden row at the top of the highets visible row (row 6)
 			self.mask += "0"
-			self.position += "0"        
+			self.position_one += "0"
+			self.position_two += "0"        
 			for i in range(0, 6, 1):
 				if self.oldboard[i][j] == "X" or self.oldboard[i][j] == "O":
 					self.mask += "1"
 				elif self.oldboard[i][j] == " ":
 					self.mask += "0"
 				if self.oldboard[i][j] == "X":
-					self.position += "1"
+					self.position_one += "1"
 				else:
-					self.position += "0"
-		self.position = int(self.position, 2)
+					self.position_one += "0"
+				if self.oldboard[i][j] == "O":
+					self.position_two += "1"
+				else:
+					self.position_two += "0"
+		self.position_one = int(self.position_one, 2)
+		self.position_two = int(self.position_two, 2)
 		self.mask = int(self.mask, 2)
 
 
@@ -88,54 +95,91 @@ class Bitboard:
 
 	def make_move(self, column):
 		self.turn += 1
-		new_position = self.position ^ self.mask
-		new_mask = self.mask | (self.mask + (1 << (column*7)))
-		self.position = new_position
-		self.mask = new_mask
+		if self.turn % 2 != 0:
+			newmask = self.mask | (self.mask + (1 << (column*7)))
+			new_position_one = self.position_two ^ newmask
+			self.mask = newmask
+			self.position_one = new_position_one
+		elif self.turn % 2 == 0:
+			newmask = self.mask | (self.mask + (1 << (column*7)))
+			new_position_two = self.position_one ^ newmask
+			self.mask = newmask
+			self.position_two = new_position_two
 
 	def connected_four(self):
-		#horizontal check  
-		crosses = self.position
+		one_player = self.position_one
 		mask = self.mask
-		naughts = crosses ^ mask
-		bitmaps = [crosses, naughts]
+		other_player = self.position_two
+		bitmaps = [one_player, other_player]
 		for maps in bitmaps:
 			# Horizontal check
 			m = maps & (maps >> 7)
 			if m & (m >> 14):
-				if maps == crosses:
-					self.xwin = 1
-				elif maps == naughts:
-					self.owin = -1
-				self.gameover = True
-				return
-			# Diagonal \
+				if maps == one_player:
+					if self.turn % 2 != 0:
+						self.xwin = 1
+					elif self.turn % 2 == 0:
+						self.owin = -1
+					self.gameover = True
+					return
+				elif maps == other_player:
+					if self.turn % 2 != 0:
+						self.xwin = 1
+					elif self.turn % 2 == 0:
+						self.owin = -1
+					self.gameover = True
+					return 
+			# Negative diagonal
 			m = maps & (maps >> 6)
 			if m & (m >> 12):
-				if maps == crosses:
-					self.xwin = 1
-				elif maps == naughts:
-					self.owin = -1
-				self.gameover = True
-				return
-			# Diagonal /
+				if maps == one_player:
+					if self.turn % 2 != 0:
+						self.xwin = 1
+					elif self.turn % 2 == 0:
+						self.owin = -1
+					self.gameover = True
+					return
+				elif maps == other_player:
+					if self.turn % 2 != 0:
+						self.xwin = 1
+					elif self.turn % 2 == 0:
+						self.owin = -1
+					self.gameover = True
+					return
+			# Positive diagonal
 			m = maps & (maps >> 8)
 			if m & (m >> 16):
-				if maps == crosses:
-					self.xwin = 1
-				elif maps == naughts:
-					self.owin = -1
-				self.gameover = True
-				return
+				if maps == one_player:
+					if self.turn % 2 != 0:
+						self.xwin = 1
+					elif self.turn % 2 == 0:
+						self.owin = -1
+					self.gameover = True
+					return
+				elif maps == other_player:
+					if self.turn % 2 != 0:
+						self.xwin = 1
+					elif self.turn % 2 == 0:
+						self.owin = -1
+					self.gameover = True
+					return
     			# Vertical
 			m = maps & (maps >> 1)
 			if m & (m >> 2):
-				if maps == crosses:
-					self.xwin = 1
-				elif maps == naughts:
-					self.owin = -1
-				self.gameover = True
-				return
+				if maps == one_player:
+					if self.turn % 2 != 0:
+						self.xwin = 1
+					elif self.turn % 2 == 0:
+						self.owin = -1
+					self.gameover = True
+					return
+				elif maps == other_player:
+					if self.turn % 2 != 0:
+						self.xwin = 1
+					elif self.turn % 2 == 0:
+						self.owin = -1
+					self.gameover = True
+					return
 		#checks for the draw
 		one = self.mask & (1 << 5)
 		two = self.mask & (1 << 12)
@@ -278,16 +322,9 @@ play = ConnectFour()
 
 def minimax(theclass, is_maximizing, depth, alpha, beta):
 	theclass.connected_four()
-	h = compute_hash(theclass.mask, theclass.position)
-	if h in transposition_dictionary:
-		if transposition_dictionary[h][0] >= beta:
-			return [transposition_dictionary[h][0], transposition_dictionary[h][1]] 
-		if transposition_dictionary[h][0] <= alpha:
-			return [transposition_dictionary[h][0], transposition_dictionary[h][1]]
-		if alpha < transposition_dictionary[h][0] and transposition_dictionary[h][0] < beta:
-			return [transposition_dictionary[h][0], transposition_dictionary[h][1]]
-		alpha = max(alpha, transposition_dictionary[h][0])
-		beta = min(beta, transposition_dictionary[h][0]) 
+	#h = compute_hash(theclass.mask, theclass.position)
+	#if h in transposition_dictionary:
+		#return [transposition_dictionary[h][0], transposition_dictionary[h][1]]  
 	if theclass.gameover == True:
 		if theclass.xwin == 1:
 			return [(10000000 * 4 * 5) / theclass.turn, ""]
@@ -327,7 +364,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			alpha = max(alpha, best_value)
 			if alpha >= beta:
 				break
-		transposition_dictionary[h] = [best_value, best_move]
+		#transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move]
 	elif is_maximizing == False:
 		best_value = float("Inf")
@@ -359,7 +396,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			beta = min(beta, best_move)
 			if alpha >= beta:
 				break
-		transposition_dictionary[h] = [best_value, best_move]
+		#transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move] 
 
 	
@@ -375,6 +412,7 @@ if twoai.lower() == "y":
 		if play.evanorodd % 2 == 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
+			bitted.turn = 0
 			aimove = minimax(bitted, True, 5, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
@@ -389,6 +427,7 @@ if twoai.lower() == "y":
 		elif play.evanorodd % 2 != 0:
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
+			bitted.turn = 1
 			aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
@@ -446,7 +485,8 @@ elif twoai.lower() == "n":
 				elif play.evanorodd % 2 != 0:
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
-					aimove = minimax(bitted, False, 7, -float("Inf"), float("Inf"))[1]
+					bitted.turn = 1
+					aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
@@ -463,6 +503,7 @@ elif twoai.lower() == "n":
 				if play.evanorodd % 2 == 0:
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
+					bitted.turn = 0
 					aimove = minimax(bitted, True, 5, -float("Inf"), float("Inf"))[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
