@@ -3,20 +3,28 @@ import sys, os
 import random
 random.seed(42)
 
+#This dictionary will store the hash as a key, and the move and the associated value of that move (1 if x can win, -1 if o can win, and 0 for draw) as values
+
 transposition_dictionary = {}
 
-transposition_table = [[random.randrange(1,2**64 - 1) for cell in range(0, 50, 1)] for pieces in range(0,2,1)]
+#creates 2d list (two-dimensional as there is a list for each player) containing long numbers. It goes to 47 because (for the bitboard) that is the largest index where pieces can be placed (top right position on the board) 
 
-def compute_hash(mask, position):
-	player1 = position
-	player2 = position ^ mask
+transposition_table = [[random.randrange(1,2**64 - 1) for cell in range(0, 48, 1)] for pieces in range(0,2,1)]
+
+#A function that uses the above two list and the placements of crosses and naughts on the bitboard to generate a hash 
+
+def compute_hash(position_one, position_two):
+	player1 = position_one
+	player2 = position_two
 	h = 0
-	for i in range(0, 50, 1):
+	for i in range(0, 48, 1):
 		if player1 & (1 << i):
 			h = h ^ transposition_table[0][i]
 		elif player2 & (1 << i):
 			h = h ^ transposition_table[1][i]			
 	return h              
+
+#Ensures text gets printed to the console without delay
 
 class Unbuffered(object):
    def __init__(self, stream):
@@ -62,11 +70,26 @@ class Bitboard:
 					self.position_two += "1"
 				else:
 					self.position_two += "0"
+		#This variable can be used for the class's printer function
+		self.mask_bytes = copy.deepcopy(self.mask)
 		self.position_one = int(self.position_one, 2)
 		self.position_two = int(self.position_two, 2)
 		self.mask = int(self.mask, 2)
 
-
+	def printer(self):
+		print(self.mask_bytes[1:7] + " row 7." + " The hidden row above the highest shown row has an index of 0.")
+		print(self.mask_bytes[8:14] + " row 6." + " The hidden row above the highest shown row has an index of 7.")
+		print(self.mask_bytes[15:21] + " row 5." + " The hidden row above the highest shown row has an index of 14.")
+		print(self.mask_bytes[22:28] + " row 4." + " The hidden row above the highest shown row has an index of 21.")
+		print(self.mask_bytes[29:35] + " row 3." + " The hidden row above the highest shown row has an index of 28.")
+		print(self.mask_bytes[36:42] + " row 2." + " The hidden row above the highest shown row has an index of 35.")
+		print(self.mask_bytes[43:49] + " row 1." + " The hidden row above the highest shown row has an index of 42.")
+		print("The mask:")
+		print(bin(2**48 + self.mask)[2:])
+		print("one position")
+		print(bin(2**48 + self.position_one)[2:])
+		print("other position")
+		print(bin(2**48 + self.position_two)[2:])
 
 	def available_moves(self):
 		moves = []
@@ -322,9 +345,9 @@ play = ConnectFour()
 
 def minimax(theclass, is_maximizing, depth, alpha, beta):
 	theclass.connected_four()
-	#h = compute_hash(theclass.mask, theclass.position)
-	#if h in transposition_dictionary:
-		#return [transposition_dictionary[h][0], transposition_dictionary[h][1]]  
+	h = compute_hash(theclass.position_one, theclass.position_two)
+	if h in transposition_dictionary:
+		return [transposition_dictionary[h][0], transposition_dictionary[h][1]]  
 	if theclass.gameover == True:
 		if theclass.xwin == 1:
 			return [(10000000 * 4 * 5) / theclass.turn, ""]
@@ -364,7 +387,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			alpha = max(alpha, best_value)
 			if alpha >= beta:
 				break
-		#transposition_dictionary[h] = [best_value, best_move]
+		transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move]
 	elif is_maximizing == False:
 		best_value = float("Inf")
@@ -396,7 +419,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			beta = min(beta, best_move)
 			if alpha >= beta:
 				break
-		#transposition_dictionary[h] = [best_value, best_move]
+		transposition_dictionary[h] = [best_value, best_move]
 		return [best_value, best_move] 
 
 	
@@ -413,9 +436,9 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 0
-			aimove = minimax(bitted, True, 5, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, True, 8, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
-			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
+			print("\nNew AI with depth 8 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -428,9 +451,9 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 1
-			aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, False, 8, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
-			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
+			print("\nNew AI with depth 8 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -486,7 +509,7 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 1
-					aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
+					aimove = minimax(bitted, False, 8, -float("Inf"), float("Inf"))[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
