@@ -343,7 +343,8 @@ class ConnectFour():
 
 play = ConnectFour()		
 
-def minimax(theclass, is_maximizing, depth, alpha, beta):
+def minimax(theclass, depth, alpha, beta, colour):
+	alpha_orig = copy.deepcopy(alpha)
 	#h[2] = depth
 	#h[3] = flag
 	h = compute_hash(theclass.position_one, theclass.position_two)
@@ -355,42 +356,39 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 		elif transposition_dictionary[h][3] == "upper":
 			beta = min(beta, transposition_dictionary[h][0])
 		if alpha >= beta:
-			return [tranposition_dictionary[h][0], transposition_dictionary[h][1]] 
+			return [transposition_dictionary[h][0], transposition_dictionary[h][1]] 
 		return [transposition_dictionary[h][0], transposition_dictionary[h][1]]  
 	theclass.connected_four()
 	if theclass.gameover == True:
-		if theclass.xwin == 1:
-			return [(10000000 * 4 * 5) / theclass.turn, ""]
-		elif theclass.owin == -1:
-			return [(-10000000 * 4 * 5) / theclass.turn, ""]
+		return [((10000000 * 4 * 5) / theclass.turn) * colour, ""]
 	elif theclass.draw == True:
 		return [0, ""]
 	elif depth == 0:
 		return [0, ""]
-	if is_maximizing == True:
-		a = copy.deepcopy(alpha)
-		best_value = -float("Inf")
-		moves = theclass.available_moves()
-		centredmoves = []
-		if 4 in moves:
-			centredmoves.append(4)
-		if 3 in moves:
-			centredmoves.append(3)
-		if 6 in moves:
-			centredmoves.append(6)
-		if 2 in moves:
-			centredmoves.append(2)
-		if 5 in moves:
-			centredmoves.append(5)
-		if 1 in moves:
-			centredmoves.append(1)
-		if 7 in moves:
-			centredmoves.append(7)
-		best_move = centredmoves[0]	
-		for move in centredmoves:
+
+	best_value = -float("Inf")
+	moves = theclass.available_moves()
+	centredmoves = []
+	if 4 in moves:
+		centredmoves.append(4)
+	if 3 in moves:
+		centredmoves.append(3)
+	if 6 in moves:
+		centredmoves.append(6)
+	if 2 in moves:
+		centredmoves.append(2)
+	if 5 in moves:
+		centredmoves.append(5)
+	if 1 in moves:
+		centredmoves.append(1)
+	if 7 in moves:
+		centredmoves.append(7)
+	best_move = centredmoves[0]	
+	for move in centredmoves:
 			copied = copy.deepcopy(theclass)
 			copied.make_move(move-1)
-			hypothetical_value = minimax(copied, False, depth - 1, a, beta)[0]
+			
+			hypothetical_value = max(best_value, -1 * minimax(copied, depth - 1, -beta, -alpha, -colour)[0])
 			if hypothetical_value > best_value:
 				best_value = hypothetical_value
 				best_move = move
@@ -399,39 +397,9 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 				break
 			
 
-	elif is_maximizing == False:
-		best_value = float("Inf")
-		b = copy.deepcopy(beta)
-		moves = theclass.available_moves()
-		centredmoves = []
-		if 4 in moves:
-			centredmoves.append(4)
-		if 3 in moves:
-			centredmoves.append(3)
-		if 6 in moves:
-			centredmoves.append(6)
-		if 2 in moves:
-			centredmoves.append(2)
-		if 5 in moves:
-			centredmoves.append(5)
-		if 1 in moves:
-			centredmoves.append(1)
-		if 7 in moves:
-			centredmoves.append(7)
-		best_move = centredmoves[0]
-		for move in centredmoves:
-			copied = copy.deepcopy(theclass)
-			copied.make_move(move-1)
-			hypothetical_value = minimax(copied, True, depth -1, alpha, b)[0]
-			if hypothetical_value < best_value:
-				best_value = hypothetical_value
-				best_move = move
-			beta = min(beta, best_move)
-			if alpha >= beta:
-				break
-	if best_value <= alpha:
+	if hypothetical_value <= alpha_orig:
 		transposition_dictionary[h] = [best_value, best_move, depth, "upper"]
-	elif best_value >= beta:
+	elif hypothetical_value >= beta:
 		transposition_dictionary[h] = [best_value, best_move, depth, "lower"] 
 	else:
 		transposition_dictionary[h] = [best_value, best_move, depth, "exact"]
@@ -451,9 +419,9 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 0
-			aimove = minimax(bitted, True, 8, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, True, 6, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
-			print("\nNew AI with depth 8 dropped a piece in column {column}.".format(column=aimove))
+			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -466,9 +434,9 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 1
-			aimove = minimax(bitted, False, 8, -float("Inf"), float("Inf"))[1]
+			aimove = minimax(bitted, False, 2, -float("Inf"), float("Inf"))[1]
 			play.inputter(aimove)
-			print("\nNew AI with depth 8 dropped a piece in column {column}.".format(column=aimove))
+			print("\nNew AI with depth 2 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -524,7 +492,7 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 1
-					aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
+					aimove = minimax(bitted, 10, -float("Inf"), float("Inf"), -1)[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
