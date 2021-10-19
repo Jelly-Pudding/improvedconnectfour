@@ -343,7 +343,7 @@ class ConnectFour():
 
 play = ConnectFour()		
 
-def minimax(theclass, depth, alpha, beta, colour):
+def negamax(theclass, depth, alpha, beta, colour):
 	alpha_orig = copy.deepcopy(alpha)
 	#h[2] = depth
 	#h[3] = flag
@@ -360,7 +360,10 @@ def minimax(theclass, depth, alpha, beta, colour):
 		return [transposition_dictionary[h][0], transposition_dictionary[h][1]]  
 	theclass.connected_four()
 	if theclass.gameover == True:
-		return [((10000000 * 4 * 5) / theclass.turn) * colour, ""]
+		if theclass.xwin == 1:
+			return [((10000000 * 4 * 5) / theclass.turn) * colour, ""]
+		elif theclass.owin == -1:
+			return [((-10000000 * 4 * 5) / theclass.turn) * colour, ""]
 	elif theclass.draw == True:
 		return [0, ""]
 	elif depth == 0:
@@ -387,8 +390,7 @@ def minimax(theclass, depth, alpha, beta, colour):
 	for move in centredmoves:
 			copied = copy.deepcopy(theclass)
 			copied.make_move(move-1)
-			
-			hypothetical_value = max(best_value, -1 * minimax(copied, depth - 1, -beta, -alpha, -colour)[0])
+			hypothetical_value = max(best_value, -1 * negamax(copied, depth - 1, -beta, -alpha, -colour)[0])
 			if hypothetical_value > best_value:
 				best_value = hypothetical_value
 				best_move = move
@@ -419,7 +421,7 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 0
-			aimove = minimax(bitted, True, 6, -float("Inf"), float("Inf"))[1]
+			aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), 1)[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
@@ -434,7 +436,7 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 1
-			aimove = minimax(bitted, False, 2, -float("Inf"), float("Inf"))[1]
+			aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), -1)[1]
 			play.inputter(aimove)
 			print("\nNew AI with depth 2 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
@@ -492,7 +494,7 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 1
-					aimove = minimax(bitted, 10, -float("Inf"), float("Inf"), -1)[1]
+					aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), -1)[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
@@ -510,7 +512,7 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 0
-					aimove = minimax(bitted, True, 5, -float("Inf"), float("Inf"))[1]
+					aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), 1)[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
