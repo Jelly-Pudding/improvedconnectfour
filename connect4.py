@@ -344,10 +344,20 @@ class ConnectFour():
 play = ConnectFour()		
 
 def minimax(theclass, is_maximizing, depth, alpha, beta):
-	theclass.connected_four()
+	#h[2] = depth
+	#h[3] = flag
 	h = compute_hash(theclass.position_one, theclass.position_two)
-	if h in transposition_dictionary:
+	if h in transposition_dictionary and transposition_dictionary[h][2] >= depth:
+		if transposition_dictionary[h][3] == "exact":
+			return [transposition_dictionary[h][0], transposition_dictionary[h][1]]
+		elif transposition_dictionary[h][3] == "lower":
+			alpha = max(alpha, transposition_dictionary[h][0])
+		elif transposition_dictionary[h][3] == "upper":
+			beta = min(beta, transposition_dictionary[h][0])
+		if alpha >= beta:
+			return [tranposition_dictionary[h][0], transposition_dictionary[h][1]] 
 		return [transposition_dictionary[h][0], transposition_dictionary[h][1]]  
+	theclass.connected_four()
 	if theclass.gameover == True:
 		if theclass.xwin == 1:
 			return [(10000000 * 4 * 5) / theclass.turn, ""]
@@ -358,7 +368,7 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 	elif depth == 0:
 		return [0, ""]
 	if is_maximizing == True:
-		a = -float("Inf")
+		a = copy.deepcopy(alpha)
 		best_value = -float("Inf")
 		moves = theclass.available_moves()
 		centredmoves = []
@@ -387,11 +397,11 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			alpha = max(alpha, best_value)
 			if alpha >= beta:
 				break
-		transposition_dictionary[h] = [best_value, best_move]
-		return [best_value, best_move]
+			
+
 	elif is_maximizing == False:
 		best_value = float("Inf")
-		b = float("Inf")
+		b = copy.deepcopy(beta)
 		moves = theclass.available_moves()
 		centredmoves = []
 		if 4 in moves:
@@ -419,9 +429,14 @@ def minimax(theclass, is_maximizing, depth, alpha, beta):
 			beta = min(beta, best_move)
 			if alpha >= beta:
 				break
-		transposition_dictionary[h] = [best_value, best_move]
-		return [best_value, best_move] 
+	if best_value <= alpha:
+		transposition_dictionary[h] = [best_value, best_move, depth, "upper"]
+	elif best_value >= beta:
+		transposition_dictionary[h] = [best_value, best_move, depth, "lower"] 
+	else:
+		transposition_dictionary[h] = [best_value, best_move, depth, "exact"]
 
+	return [best_value, best_move]
 	
 
 twoai = input("Want to watch a game played by two AIs? Y or N?: ")
@@ -509,7 +524,7 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 1
-					aimove = minimax(bitted, False, 8, -float("Inf"), float("Inf"))[1]
+					aimove = minimax(bitted, False, 5, -float("Inf"), float("Inf"))[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
