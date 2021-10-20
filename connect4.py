@@ -129,6 +129,179 @@ class Bitboard:
 			self.mask = newmask
 			self.position_two = new_position_two
 
+	def shifter(self):
+		count = 0
+		bitmaps = [self.position_one, self.position_two]
+
+		#vertical
+
+		for idx, maps in enumerate(bitmaps):
+			if idx == 0:
+				newposition = bitmaps[0]
+				otherposition = bitmaps[1]
+			if idx == 1:
+				newposition = bitmaps[1]
+				otherposition = bitmaps[0]
+			#print("The position initially:")
+			#print(bin(2**48 + newposition)[3:])
+			newposition = newposition & (newposition >> 1)
+			#print("Right shifted:")
+			#print(bin(2**48 + newposition)[3:])
+			if newposition & (newposition >> 1):
+				newposition = newposition & (newposition >> 1)
+				#print("Shifted again:")
+				#print(bin(2**48 + newposition)[3:])
+				if idx == 0:
+					number_of_three_columns = bin(2**48 + newposition)[3:].count("1")
+					count += number_of_three_columns
+				elif idx == 1:
+					number_of_three_columns = bin(2**48 + newposition)[3:].count("1")
+					count -= number_of_three_columns
+				for index, item in enumerate(bin(2**48 + newposition)[3:]):
+					if item == "1":
+						#print(index)
+						try:
+							if bin(2**48 + otherposition)[3:][index-3] == "1":	
+								if idx == 0:
+									count -= 1
+								elif idx == 1:
+									count += 1
+								#print("yep. index value = " + str(index-3))
+						except IndexError:
+							pass
+							#print("Index Error - vertical")
+		
+
+		#horizontal checker
+
+		for idx, maps in enumerate(bitmaps):
+			if idx == 0:
+				newposition = bitmaps[0]
+				otherposition = bitmaps[1]
+			if idx == 1:
+				newposition = bitmaps[1]
+				otherposition = bitmaps[0]
+			#print("The position")
+			#print(bin(2**48 + newposition)[3:])
+			#print("Right shifted:")
+			newposition = newposition & (newposition >> 7)
+			#print(bin(2**48 + newposition)[3:])
+			if newposition & (newposition >> 7):
+				newposition = newposition & (newposition >> 7)
+				#print("Final look of position:")
+				#print(bin(2**48 + newposition)[3:])
+				if idx == 0:
+					number_of_3_horizontals = bin(2**48 + newposition)[3:].count("1")
+					count += number_of_3_horizontals * 2
+				elif idx == 1:
+					number_of_3_horizontals = bin(2**48 + newposition)[3:].count("1")
+					count -= number_of_3_horizontals * 2
+				for index, item in enumerate(bin(2**48 + newposition)[3:]):
+					if item == "1":
+						try:
+							if bin(2**48 + otherposition)[3:][index+7] == "1":
+								if idx == 0:
+									count -= 1
+								elif idx == 1:
+									count += 1
+								#print("index plus 7")
+								#print(index+7)
+						except IndexError:
+							pass
+							#print("Index Error - horizontal")
+						try:
+							if bin(2**48 + otherposition)[3:][index-21] == "1" and index-21 > 0:
+								if idx == 0:
+									count -= 1
+								elif idx == 1:
+									count += 1
+								#print("index minus 21:")
+								#print(index-21)
+						except IndexError:
+							pass
+							#print("Index Error - horizontal")
+
+		#positive diagonal
+
+		for idx, maps in enumerate(bitmaps):
+			if idx == 0:
+				newposition = bitmaps[0]
+				otherposition = bitmaps[1]
+			if idx == 1:
+				newposition = bitmaps[1]
+				otherposition = bitmaps[0]
+			#print("The position initially:")
+			#print(bin(2**48 + newposition)[3:])
+			newposition = newposition & (newposition >> 8)
+			#print("Right shifted:")
+			#print(bin(2**48 + newposition)[3:])
+			if newposition & (newposition >> 8):
+				newposition = newposition & (newposition >> 8)
+				#print("Shifted again:")
+				#print(bin(2**48 + newposition)[3:])
+				if idx == 0:
+					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
+					count += number_of_three_positive_diagonals
+				elif idx == 1:
+					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
+					count -= number_of_three_positive_diagonals
+				for index, item in enumerate(bin(2**48 + newposition)[3:]):
+					if item == "1":
+						#print(index)
+						try:
+							if bin(2**48 + otherposition)[3:][index-24] == "1":	
+								if idx == 0:
+									count -= 1
+								elif idx == 1:
+									count += 1
+								#print("yep. index value = " + str(index-24))
+						except IndexError:
+							pass
+							#print("Index Error - positive diagonal")
+
+		#negative diagonal
+
+		for idx, maps in enumerate(bitmaps):
+			if idx == 0:
+				newposition = bitmaps[0]
+				otherposition = bitmaps[1]
+			if idx == 1:
+				newposition = bitmaps[1]
+				otherposition = bitmaps[0]
+			#print("The position initially:")
+			#print(bin(2**48 + newposition)[3:])
+			newposition = newposition & (newposition >> 6)
+			#print("Right shifted:")
+			#print(bin(2**48 + newposition)[3:])
+			if newposition & (newposition >> 6):
+				newposition = newposition & (newposition >> 6)
+				#print("Shifted again:")
+				#print(bin(2**48 + newposition)[3:])
+				if idx == 0:
+					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
+					count += number_of_three_positive_diagonals
+				elif idx == 1:
+					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
+					count -= number_of_three_positive_diagonals
+				for index, item in enumerate(bin(2**48 + newposition)[3:]):
+					if item == "1":
+						#print(index)
+						try:
+							if bin(2**48 + otherposition)[3:][index+6] == "1":	
+								if idx == 0:
+									count -= 1
+								elif idx == 1:
+									count += 1
+								#print("yep. index value = " + str(index+6))
+						except IndexError:
+							pass
+							#print("Index Error - negative diagonal")
+	
+		return count
+
+
+
+
 	def connected_four(self):
 		one_player = self.position_one
 		mask = self.mask
@@ -345,8 +518,6 @@ play = ConnectFour()
 
 def negamax(theclass, depth, alpha, beta, colour):
 	alpha_orig = copy.deepcopy(alpha)
-	#h[2] = depth
-	#h[3] = flag
 	h = compute_hash(theclass.position_one, theclass.position_two)
 	if h in transposition_dictionary and transposition_dictionary[h][2] >= depth:
 		if transposition_dictionary[h][3] == "exact":
@@ -367,7 +538,7 @@ def negamax(theclass, depth, alpha, beta, colour):
 	elif theclass.draw == True:
 		return [0, ""]
 	elif depth == 0:
-		return [0, ""]
+		return [theclass.shifter(), ""]
 
 	best_value = -float("Inf")
 	moves = theclass.available_moves()
@@ -421,9 +592,9 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 0
-			aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), 1)[1]
+			aimove = negamax(bitted, 5, -float("Inf"), float("Inf"), 1)[1]
 			play.inputter(aimove)
-			print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
+			print("\nNew AI with depth 10 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -436,9 +607,9 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 1
-			aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), -1)[1]
+			aimove = negamax(bitted, 5, -float("Inf"), float("Inf"), -1)[1]
 			play.inputter(aimove)
-			print("\nNew AI with depth 2 dropped a piece in column {column}.".format(column=aimove))
+			print("\nNew AI with depth 10 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -494,9 +665,9 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 1
-					aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), -1)[1]
+					aimove = negamax(bitted, 5, -float("Inf"), float("Inf"), -1)[1]
 					play.inputter(aimove)
-					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
+					print("\nNew AI with depth 12 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
 					if play.gameover == True and play.draw != True:
 						play.printer()
@@ -512,9 +683,9 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 0
-					aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), 1)[1]
+					aimove = negamax(bitted, 12, -float("Inf"), float("Inf"), 1)[1]
 					play.inputter(aimove)
-					print("\nNew AI with depth 6 dropped a piece in column {column}.".format(column=aimove))
+					print("\nNew AI with depth 12 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
 					if play.gameover == True and play.draw != True:
 						play.printer()
