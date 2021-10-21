@@ -198,10 +198,10 @@ class Bitboard:
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
 					number_of_3_horizontals = bin(2**48 + newposition)[3:].count("1")
-					count += number_of_3_horizontals * 2
+					count += number_of_3_horizontals * 5
 				elif idx == 1:
 					number_of_3_horizontals = bin(2**48 + newposition)[3:].count("1")
-					count -= number_of_3_horizontals * 2
+					count -= number_of_3_horizontals * 5
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
 						#print(index)
@@ -209,34 +209,34 @@ class Bitboard:
 							#adjusts score if the opponent is on the left
 							if bin(2**48 + otherposition)[3:][index+7] == "1":
 								if idx == 0:
-									count -= 1
+									count -= 2.5
 								elif idx == 1:
-									count += 1
+									count += 2.5
 								#print("index plus 7")
 								#print(index+7)
 						except IndexError:
 							#There will be an index error if column 1, 2 and 3 are filled (because, depending on the row, the index will be somewhere between 42 and 47)
 							#Because there is no room on the left side for another piece, the score gets adjusted accordingly.
 							if idx == 0:
-								count -= 1
+								count -= 2.5
 							elif idx == 1:
-								count += 1
+								count += 2.5
 							#print("Index Error " + str(index))
 						#adjusts score if the opponet is on the right
 						if bin(2**48 + otherposition)[3:][index-21] == "1" and index-21 >= 0:
 							if idx == 0:
-								count -= 1
+								count -= 2.5
 							elif idx == 1:
-								count += 1
+								count += 2.5
 							#print("index minus 21:")
 							#print(index-21)
 						if index-21 < 0:
 							#print("index before minus 21: " + str(index))
 							#if the index goes into the negatives, then columns 5, 6 and 7 are filled (as the index would be between 14-19 depending on the row). There is no space on the right-hand side(so the score is adjusted accordingly) 
 							if idx == 0:
-								count -= 1
+								count -= 2.5
 							elif idx == 1:
-								count += 1
+								count += 2.5
 
 		#positive diagonal
 
@@ -258,33 +258,33 @@ class Bitboard:
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count += number_of_three_positive_diagonals
+					count += number_of_three_positive_diagonals * 2
 				elif idx == 1:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count -= number_of_three_positive_diagonals
+					count -= number_of_three_positive_diagonals * 2
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
 						#print(index)
 						if bin(2**48 + otherposition)[3:][index-24] == "1" and index-24 >= 0:	
 							if idx == 0:
-								count -= 1
+								count -= 2
 							elif idx == 1:
-								count += 1
+								count += 2
 							#print("yep. index value = " + str(index-24))
 						#It will be less than 0 when columns 5, 6, and 7 are filled. The score is adjusted as there's no room to the right.
 						if index -24 < 0:
 							#print("the index is: " + str(index-24))
 							#print("It's less than 0")
 							if idx == 0:
-								count -= 1
+								count -= 2
 							elif idx == 1:
-								count += 1
+								count += 2
 						#No more space above these indices, so the score is adjusted accordingly. Index 23 (top of visible row 6) is accounted for above as 23 minus 24 is less than 0. 
 						if index == 44 or index == 37 or index == 30:
 							if idx == 0:
-								count -= 1
+								count -= 2
 							elif idx == 1:
-								count += 1
+								count += 2
 
 		
 		#negative diagonal
@@ -307,33 +307,33 @@ class Bitboard:
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count += number_of_three_positive_diagonals
+					count += number_of_three_positive_diagonals * 2
 				elif idx == 1:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count -= number_of_three_positive_diagonals
+					count -= number_of_three_positive_diagonals * 2
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
 						#print("original index = " + str(index))
 						try:
 							if bin(2**48 + otherposition)[3:][index+6] == "1":	
 								if idx == 0:
-									count -= 1
+									count -= 2
 								elif idx == 1:
-									count += 1
+									count += 2
 								#print("Index value after + 6 = " + str(index+6))
 						#There will be an IndexError if columns 1, 2 and 3 are filled (indices 42-45 depending on the row). No more space to the left, so scores are adjusted.
 						except IndexError:
 							if idx == 0:
-								count -= 1
+								count -= 2
 							elif idx == 1:
-								count += 1
+								count += 2
 							#print("Index Error - negative diagonal")
 						#No more space available above these indices, so the score gets adjusted.
 						if index == 35 or index == 28 or index == 21 or index == 14:
 							if idx == 0:
-								count -= 1
+								count -= 2
 							elif idx == 1:
-								count += 1
+								count += 2
 		return count
 
 	def connected_four(self):
@@ -581,12 +581,12 @@ def negamax(theclass, depth, alpha, beta, colour):
 		centredmoves.append(4)
 	if 3 in moves:
 		centredmoves.append(3)
-	if 6 in moves:
-		centredmoves.append(6)
-	if 2 in moves:
-		centredmoves.append(2)
 	if 5 in moves:
 		centredmoves.append(5)
+	if 2 in moves:
+		centredmoves.append(2)
+	if 6 in moves:
+		centredmoves.append(6)
 	if 1 in moves:
 		centredmoves.append(1)
 	if 7 in moves:
@@ -699,9 +699,9 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 1
-					aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), -1)[1]
+					aimove = negamax(bitted, 11, -float("Inf"), float("Inf"), -1)[1]
 					play.inputter(aimove)
-					print("\nNew AI with depth 10 dropped a piece in column {column}.".format(column=aimove))
+					print("\nNew AI with depth 11 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
 					if play.gameover == True and play.draw != True:
 						play.printer()
