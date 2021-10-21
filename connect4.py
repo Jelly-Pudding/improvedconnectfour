@@ -164,14 +164,11 @@ class Bitboard:
 					count -= number_of_three_columns
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
-						try:
-							if bin(2**48 + otherposition)[3:][index-3] == "1":	
-								if idx == 0:
-									count -= 1
-								elif idx == 1:
-									count += 1
-						except IndexError:
-							print("Index Error - vertical")
+						if bin(2**48 + otherposition)[3:][index-3] == "1":	
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
 						# Checks if the connect3 is at the top of the board where there's no space left
 						if bin(2**49 + self.hidden_row)[3:][index-2] == "1":
 							if idx == 0:
@@ -243,8 +240,6 @@ class Bitboard:
 
 		#positive diagonal
 
-		
-
 		for idx, maps in enumerate(bitmaps):
 			if idx == 0:
 				newposition = bitmaps[0]
@@ -270,16 +265,12 @@ class Bitboard:
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
 						#print(index)
-						try:
-							if bin(2**48 + otherposition)[3:][index-24] == "1" and index-24 >= 0:	
-								if idx == 0:
-									count -= 1
-								elif idx == 1:
-									count += 1
-								#print("yep. index value = " + str(index-24))
-						except IndexError:
-							pass
-							#print("Index Error - positive diagonal" + str(index))
+						if bin(2**48 + otherposition)[3:][index-24] == "1" and index-24 >= 0:	
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
+							#print("yep. index value = " + str(index-24))
 						#It will be less than 0 when columns 5, 6, and 7 are filled. The score is adjusted as there's no room to the right.
 						if index -24 < 0:
 							#print("the index is: " + str(index-24))
@@ -708,9 +699,9 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 1
-					aimove = negamax(bitted, 9, -float("Inf"), float("Inf"), -1)[1]
+					aimove = negamax(bitted, 10, -float("Inf"), float("Inf"), -1)[1]
 					play.inputter(aimove)
-					print("\nNew AI with depth 9 dropped a piece in column {column}.".format(column=aimove))
+					print("\nNew AI with depth 10 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
 					if play.gameover == True and play.draw != True:
 						play.printer()
