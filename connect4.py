@@ -51,16 +51,19 @@ class Bitboard:
 		self.oldboard = board
 
 	def get_position_and_mask(self):
-		self.position_one, self.position_two, self.mask = "", "", "" 
+		self.position_one, self.position_two, self.mask, self.hidden_row = "", "", "", "" 
 		for j in range(13, 0, -2):
 			#creates the hidden row at the top of the highets visible row (row 6)
+			self.hidden_row += "1"
 			self.mask += "0"
 			self.position_one += "0"
 			self.position_two += "0"        
 			for i in range(0, 6, 1):
 				if self.oldboard[i][j] == "X" or self.oldboard[i][j] == "O":
+					self.hidden_row += "0"
 					self.mask += "1"
 				elif self.oldboard[i][j] == " ":
+					self.hidden_row += "0" 
 					self.mask += "0"
 				if self.oldboard[i][j] == "X":
 					self.position_one += "1"
@@ -75,6 +78,7 @@ class Bitboard:
 		self.position_one = int(self.position_one, 2)
 		self.position_two = int(self.position_two, 2)
 		self.mask = int(self.mask, 2)
+		self.hidden_row = int(self.hidden_row, 2)
 
 	def printer(self):
 		print(self.mask_bytes[1:7] + " row 7." + " The hidden row above the highest shown row has an index of 0.")
@@ -85,11 +89,13 @@ class Bitboard:
 		print(self.mask_bytes[36:42] + " row 2." + " The hidden row above the highest shown row has an index of 35.")
 		print(self.mask_bytes[43:49] + " row 1." + " The hidden row above the highest shown row has an index of 42.")
 		print("The mask:")
-		print(bin(2**48 + self.mask)[2:])
-		print("one position")
-		print(bin(2**48 + self.position_one)[2:])
-		print("other position")
-		print(bin(2**48 + self.position_two)[2:])
+		print(bin(2**48 + self.mask)[3:])
+		print("The hidden row:")
+		print(bin(2**49 + self.hidden_row)[3:])
+		print("One position:")
+		print(bin(2**48 + self.position_one)[3:])
+		print("Other position:")
+		print(bin(2**48 + self.position_two)[3:])
 
 	def available_moves(self):
 		moves = []
@@ -134,7 +140,6 @@ class Bitboard:
 		bitmaps = [self.position_one, self.position_two]
 
 		#vertical
-
 		for idx, maps in enumerate(bitmaps):
 			if idx == 0:
 				newposition = bitmaps[0]
@@ -159,19 +164,22 @@ class Bitboard:
 					count -= number_of_three_columns
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
-						#print(index)
 						try:
 							if bin(2**48 + otherposition)[3:][index-3] == "1":	
 								if idx == 0:
 									count -= 1
 								elif idx == 1:
 									count += 1
-								#print("yep. index value = " + str(index-3))
 						except IndexError:
-							pass
-							#print("Index Error - vertical")
+							print("Index Error - vertical")
+						# Checks if the connect3 is at the top of the board where there's no space left
+						if bin(2**49 + self.hidden_row)[3:][index-2] == "1":
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
+	
 		
-
 		#horizontal checker
 
 		for idx, maps in enumerate(bitmaps):
@@ -188,6 +196,7 @@ class Bitboard:
 			#print(bin(2**48 + newposition)[3:])
 			if newposition & (newposition >> 7):
 				newposition = newposition & (newposition >> 7)
+				#print(True)
 				#print("Final look of position:")
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
@@ -198,7 +207,9 @@ class Bitboard:
 					count -= number_of_3_horizontals * 2
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
+						#print(index)
 						try:
+							#adjusts score if the opponent is on the left
 							if bin(2**48 + otherposition)[3:][index+7] == "1":
 								if idx == 0:
 									count -= 1
@@ -207,21 +218,32 @@ class Bitboard:
 								#print("index plus 7")
 								#print(index+7)
 						except IndexError:
-							pass
-							#print("Index Error - horizontal")
-						try:
-							if bin(2**48 + otherposition)[3:][index-21] == "1" and index-21 > 0:
-								if idx == 0:
-									count -= 1
-								elif idx == 1:
-									count += 1
-								#print("index minus 21:")
-								#print(index-21)
-						except IndexError:
-							pass
-							#print("Index Error - horizontal")
+							#There will be an index error if column 1, 2 and 3 are filled (because, depending on the row, the index will be somewhere between 42 and 47)
+							#Because there is no room on the left side for another piece, the score gets adjusted accordingly.
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
+							#print("Index Error " + str(index))
+						#adjusts score if the opponet is on the right
+						if bin(2**48 + otherposition)[3:][index-21] == "1" and index-21 >= 0:
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
+							#print("index minus 21:")
+							#print(index-21)
+						if index-21 < 0:
+							#print("index before minus 21: " + str(index))
+							#if the index goes into the negatives, then columns 5, 6 and 7 are filled (as the index would be between 14-19 depending on the row). There is no space on the right-hand side(so the score is adjusted accordingly) 
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
 
 		#positive diagonal
+
+		
 
 		for idx, maps in enumerate(bitmaps):
 			if idx == 0:
@@ -249,7 +271,7 @@ class Bitboard:
 					if item == "1":
 						#print(index)
 						try:
-							if bin(2**48 + otherposition)[3:][index-24] == "1":	
+							if bin(2**48 + otherposition)[3:][index-24] == "1" and index-24 >= 0:	
 								if idx == 0:
 									count -= 1
 								elif idx == 1:
@@ -257,8 +279,23 @@ class Bitboard:
 								#print("yep. index value = " + str(index-24))
 						except IndexError:
 							pass
-							#print("Index Error - positive diagonal")
+							#print("Index Error - positive diagonal" + str(index))
+						#It will be less than 0 when columns 5, 6, and 7 are filled. The score is adjusted as there's no room to the right.
+						if index -24 < 0:
+							#print("the index is: " + str(index-24))
+							#print("It's less than 0")
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
+						#No more space above these indices, so the score is adjusted accordingly. Index 23 (top of visible row 6) is accounted for above as 23 minus 24 is less than 0. 
+						if index == 44 or index == 37 or index == 30:
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
 
+		
 		#negative diagonal
 
 		for idx, maps in enumerate(bitmaps):
@@ -285,22 +322,28 @@ class Bitboard:
 					count -= number_of_three_positive_diagonals
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
-						#print(index)
+						#print("original index = " + str(index))
 						try:
 							if bin(2**48 + otherposition)[3:][index+6] == "1":	
 								if idx == 0:
 									count -= 1
 								elif idx == 1:
 									count += 1
-								#print("yep. index value = " + str(index+6))
+								#print("Index value after + 6 = " + str(index+6))
+						#There will be an IndexError if columns 1, 2 and 3 are filled (indices 42-45 depending on the row). No more space to the left, so scores are adjusted.
 						except IndexError:
-							pass
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
 							#print("Index Error - negative diagonal")
-	
+						#No more space available above these indices, so the score gets adjusted.
+						if index == 35 or index == 28 or index == 21 or index == 14:
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
 		return count
-
-
-
 
 	def connected_four(self):
 		one_player = self.position_one
@@ -665,9 +708,9 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 1
-					aimove = negamax(bitted, 5, -float("Inf"), float("Inf"), -1)[1]
+					aimove = negamax(bitted, 9, -float("Inf"), float("Inf"), -1)[1]
 					play.inputter(aimove)
-					print("\nNew AI with depth 12 dropped a piece in column {column}.".format(column=aimove))
+					print("\nNew AI with depth 9 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
 					if play.gameover == True and play.draw != True:
 						play.printer()
@@ -683,9 +726,9 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 0
-					aimove = negamax(bitted, 12, -float("Inf"), float("Inf"), 1)[1]
+					aimove = negamax(bitted, 9, -float("Inf"), float("Inf"), 1)[1]
 					play.inputter(aimove)
-					print("\nNew AI with depth 12 dropped a piece in column {column}.".format(column=aimove))
+					print("\nNew AI with depth 9 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
 					if play.gameover == True and play.draw != True:
 						play.printer()
