@@ -140,7 +140,21 @@ class Bitboard:
 		count = 0
 		bitmaps = [self.position_one, self.position_two]
 
+		'''
+
+		This function counts up connect 3s along columns, rows, and diagonals. It gives points when
+		connect 3s are formed, giving two points for every row and diagonal and one point for every
+		column (as rows and diagonals can often provide two spots for a possible connect four to
+		form - whereas a column only provides one spot which is directly above it). The function deducts
+		the necessary amount of points when the opponent blocks a possibility for a connect four to form. 
+		It also deducts points in cases where it is impossible to ever form a connect 4 from the existing 
+		connect 3. For example, if row 4, 5 and 6 form a vertical connect 3, it doesn't matter since there
+		is no more room above row 6 to form a connect 4. 
+
+		'''
+
 		#vertical
+
 		for idx, maps in enumerate(bitmaps):
 			if idx == 0:
 				newposition = bitmaps[0]
@@ -165,12 +179,13 @@ class Bitboard:
 					count -= number_of_three_columns
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
+						#Subtracts points if the opponent places above their connect 3
 						if bin(2**48 + otherposition)[3:][index-3] == "1":	
 							if idx == 0:
 								count -= 1
 							elif idx == 1:
 								count += 1
-						# Checks if the connect3 is at the top of the board where there's no space left
+						#Subtracts points if there is no room for a connect four (i.e. if the "hidden row" is above the connect 3)
 						if bin(2**49 + self.hidden_row)[3:][index-2] == "1":
 							if idx == 0:
 								count -= 1
@@ -213,8 +228,6 @@ class Bitboard:
 									count -= 1
 								elif idx == 1:
 									count += 1
-								#print("index plus 7")
-								#print(index+7)
 						except IndexError:
 							#There will be an index error if column 1, 2 and 3 are filled (because, depending on the row, the index will be somewhere between 42 and 47)
 							#Because there is no room on the left side for another piece, the score gets adjusted accordingly.
@@ -229,18 +242,18 @@ class Bitboard:
 								count -= 1
 							elif idx == 1:
 								count += 1
-							#print("index minus 21:")
-							#print(index-21)
 						if index-21 < 0:
-							#print("index before minus 21: " + str(index))
 							#if the index goes into the negatives, then columns 5, 6 and 7 are filled (as the index would be between 14-19 depending on the row). There is no space on the right-hand side(so the score is adjusted accordingly) 
 							if idx == 0:
 								count -= 1
 							elif idx == 1:
 								count += 1
 
+		
+
 		#positive diagonal
 
+		
 		for idx, maps in enumerate(bitmaps):
 			if idx == 0:
 				newposition = bitmaps[0]
@@ -259,35 +272,48 @@ class Bitboard:
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count += number_of_three_positive_diagonals * 1
+					count += number_of_three_positive_diagonals * 2
 				elif idx == 1:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count -= number_of_three_positive_diagonals * 1
+					count -= number_of_three_positive_diagonals * 2
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
 						#print(index)
+						#Checks if the opponent has filled the space above the connect three positive diagonal
 						if bin(2**48 + otherposition)[3:][index-24] == "1" and index-24 >= 0:	
 							if idx == 0:
 								count -= 1
 							elif idx == 1:
 								count += 1
-							#print("yep. index value = " + str(index-24))
 						#It will be less than 0 when columns 5, 6, and 7 are filled. The score is adjusted as there's no room to the right.
 						if index -24 < 0:
-							#print("the index is: " + str(index-24))
-							#print("It's less than 0")
 							if idx == 0:
 								count -= 1
 							elif idx == 1:
 								count += 1
-						#No more space above these indices, so the score is adjusted accordingly. Index 23 (top of visible row 6) is accounted for above as 23 minus 24 is less than 0. 
+						#Checks if the opponent has filled the space below the connect three positive diagonal
+						try:
+							if bin(2**48 + otherposition)[3:][index+8] == "1":
+								if idx == 0:
+									count -= 1
+								elif idx == 1:
+									count += 1
+						except IndexError:
+							#There will be indices that yield an index error here, but they have been dealt with in other statements
+							pass	
+						#Indices where only one space will ever be available to form a connect four along a positive diagonal. (44 actually has no spaces, but it is accounted for below)
+						if index == 47 or index == 46 or index == 45 or index == 44 or index == 40 or index == 33 or index == 26 or index == 19:
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
+						#No more space above these indices, so the score is adjusted accordingly. Index 23 is accounted for above as 23 minus 24 is less than 0. 
 						if index == 44 or index == 37 or index == 30:
 							if idx == 0:
 								count -= 1
 							elif idx == 1:
 								count += 1
 
-		
 		#negative diagonal
 
 		for idx, maps in enumerate(bitmaps):
@@ -308,35 +334,54 @@ class Bitboard:
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count += number_of_three_positive_diagonals * 1
+					count += number_of_three_positive_diagonals * 2
 				elif idx == 1:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count -= number_of_three_positive_diagonals * 1
+					count -= number_of_three_positive_diagonals * 2
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
 						#print("original index = " + str(index))
+						#If the opponent blocks the three-piece negative diagonal from above, the score gets adjusted
 						try:
 							if bin(2**48 + otherposition)[3:][index+6] == "1":	
 								if idx == 0:
 									count -= 1
 								elif idx == 1:
 									count += 1
-								#print("Index value after + 6 = " + str(index+6))
 						#There will be an IndexError if columns 1, 2 and 3 are filled (indices 42-45 depending on the row). No more space to the left, so scores are adjusted.
 						except IndexError:
 							if idx == 0:
 								count -= 1
 							elif idx == 1:
 								count += 1
-							#print("Index Error - negative diagonal")
-						#No more space available above these indices, so the score gets adjusted.
-						if index == 35 or index == 28 or index == 21 or index == 14:
+							#print("Index Error - negative diagonal")				
+						#Indices where there is only room to form one possible connect four
+						if index == 45 or index == 38 or index == 31 or index == 24 or index == 17 or index == 16:
 							if idx == 0:
 								count -= 1
 							elif idx == 1:
 								count += 1
+						#If the opponent blocks the three-piece negative diagonal from below, the score gets adjusted
+						if bin(2**48 + otherposition)[3:][index-18] == "1" and index-18 >= 0:
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
+						#No more space available above these indices, so the score gets adjusted.
+						if index == 35 or index == 28 or index == 21 or index == 15:
+							if idx == 0:
+								count -= 1
+							elif idx == 1:
+								count += 1
+						#Special case for index 14 since there is no more space above it and there is no room for a negative connect four below it. 
+						if index == 14:
+							if idx == 0:
+								count -= 2
+							elif idx == 1:
+								count += 2
+		
+		#print(count)
 		return count
-
 	def connected_four(self):
 		one_player = self.position_one
 		mask = self.mask
