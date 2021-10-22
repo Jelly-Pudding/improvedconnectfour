@@ -1,6 +1,7 @@
 import copy
 import sys, os
 import random
+import time
 random.seed(42)
 
 #This dictionary will store the hash as a key, and the move and the associated value of that move (1 if x can win, -1 if o can win, and 0 for draw) as values
@@ -198,10 +199,10 @@ class Bitboard:
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
 					number_of_3_horizontals = bin(2**48 + newposition)[3:].count("1")
-					count += number_of_3_horizontals * 5
+					count += number_of_3_horizontals * 2
 				elif idx == 1:
 					number_of_3_horizontals = bin(2**48 + newposition)[3:].count("1")
-					count -= number_of_3_horizontals * 5
+					count -= number_of_3_horizontals * 2
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
 						#print(index)
@@ -209,34 +210,34 @@ class Bitboard:
 							#adjusts score if the opponent is on the left
 							if bin(2**48 + otherposition)[3:][index+7] == "1":
 								if idx == 0:
-									count -= 2.5
+									count -= 1
 								elif idx == 1:
-									count += 2.5
+									count += 1
 								#print("index plus 7")
 								#print(index+7)
 						except IndexError:
 							#There will be an index error if column 1, 2 and 3 are filled (because, depending on the row, the index will be somewhere between 42 and 47)
 							#Because there is no room on the left side for another piece, the score gets adjusted accordingly.
 							if idx == 0:
-								count -= 2.5
+								count -= 1
 							elif idx == 1:
-								count += 2.5
+								count += 1
 							#print("Index Error " + str(index))
 						#adjusts score if the opponet is on the right
 						if bin(2**48 + otherposition)[3:][index-21] == "1" and index-21 >= 0:
 							if idx == 0:
-								count -= 2.5
+								count -= 1
 							elif idx == 1:
-								count += 2.5
+								count += 1
 							#print("index minus 21:")
 							#print(index-21)
 						if index-21 < 0:
 							#print("index before minus 21: " + str(index))
 							#if the index goes into the negatives, then columns 5, 6 and 7 are filled (as the index would be between 14-19 depending on the row). There is no space on the right-hand side(so the score is adjusted accordingly) 
 							if idx == 0:
-								count -= 2.5
+								count -= 1
 							elif idx == 1:
-								count += 2.5
+								count += 1
 
 		#positive diagonal
 
@@ -258,33 +259,33 @@ class Bitboard:
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count += number_of_three_positive_diagonals * 2
+					count += number_of_three_positive_diagonals * 1
 				elif idx == 1:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count -= number_of_three_positive_diagonals * 2
+					count -= number_of_three_positive_diagonals * 1
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
 						#print(index)
 						if bin(2**48 + otherposition)[3:][index-24] == "1" and index-24 >= 0:	
 							if idx == 0:
-								count -= 2
+								count -= 1
 							elif idx == 1:
-								count += 2
+								count += 1
 							#print("yep. index value = " + str(index-24))
 						#It will be less than 0 when columns 5, 6, and 7 are filled. The score is adjusted as there's no room to the right.
 						if index -24 < 0:
 							#print("the index is: " + str(index-24))
 							#print("It's less than 0")
 							if idx == 0:
-								count -= 2
+								count -= 1
 							elif idx == 1:
-								count += 2
+								count += 1
 						#No more space above these indices, so the score is adjusted accordingly. Index 23 (top of visible row 6) is accounted for above as 23 minus 24 is less than 0. 
 						if index == 44 or index == 37 or index == 30:
 							if idx == 0:
-								count -= 2
+								count -= 1
 							elif idx == 1:
-								count += 2
+								count += 1
 
 		
 		#negative diagonal
@@ -307,33 +308,33 @@ class Bitboard:
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count += number_of_three_positive_diagonals * 2
+					count += number_of_three_positive_diagonals * 1
 				elif idx == 1:
 					number_of_three_positive_diagonals = bin(2**48 + newposition)[3:].count("1")
-					count -= number_of_three_positive_diagonals * 2
+					count -= number_of_three_positive_diagonals * 1
 				for index, item in enumerate(bin(2**48 + newposition)[3:]):
 					if item == "1":
 						#print("original index = " + str(index))
 						try:
 							if bin(2**48 + otherposition)[3:][index+6] == "1":	
 								if idx == 0:
-									count -= 2
+									count -= 1
 								elif idx == 1:
-									count += 2
+									count += 1
 								#print("Index value after + 6 = " + str(index+6))
 						#There will be an IndexError if columns 1, 2 and 3 are filled (indices 42-45 depending on the row). No more space to the left, so scores are adjusted.
 						except IndexError:
 							if idx == 0:
-								count -= 2
+								count -= 1
 							elif idx == 1:
-								count += 2
+								count += 1
 							#print("Index Error - negative diagonal")
 						#No more space available above these indices, so the score gets adjusted.
 						if index == 35 or index == 28 or index == 21 or index == 14:
 							if idx == 0:
-								count -= 2
+								count -= 1
 							elif idx == 1:
-								count += 2
+								count += 1
 		return count
 
 	def connected_four(self):
@@ -550,7 +551,7 @@ class ConnectFour():
 
 play = ConnectFour()		
 
-def negamax(theclass, depth, alpha, beta, colour):
+def negamax(theclass, depth, alpha, beta, colour, best_move_so_far):
 	alpha_orig = copy.deepcopy(alpha)
 	h = compute_hash(theclass.position_one, theclass.position_two)
 	if h in transposition_dictionary and transposition_dictionary[h][2] >= depth:
@@ -593,26 +594,53 @@ def negamax(theclass, depth, alpha, beta, colour):
 		centredmoves.append(7)
 	best_move = centredmoves[0]	
 	for move in centredmoves:
-			copied = copy.deepcopy(theclass)
-			copied.make_move(move-1)
-			hypothetical_value = max(best_value, -1 * negamax(copied, depth - 1, -beta, -alpha, -colour)[0])
-			if hypothetical_value > best_value:
-				best_value = hypothetical_value
-				best_move = move
-			alpha = max(alpha, best_value)
-			if alpha >= beta:
-				break
-			
-
+		if best_move_so_far != None:
+			move = best_move_so_far
+			best_move_so_far = None
+		copied = copy.deepcopy(theclass)
+		copied.make_move(move-1)
+		hypothetical_value = max(best_value, -1 * negamax(copied, depth - 1, -beta, -alpha, -colour, best_move_so_far)[0])
+		if hypothetical_value > best_value:
+			best_value = hypothetical_value
+			best_move = move
+		alpha = max(alpha, best_value)
+		if alpha >= beta:
+			break
 	if hypothetical_value <= alpha_orig:
 		transposition_dictionary[h] = [best_value, best_move, depth, "upper"]
 	elif hypothetical_value >= beta:
 		transposition_dictionary[h] = [best_value, best_move, depth, "lower"] 
 	else:
 		transposition_dictionary[h] = [best_value, best_move, depth, "exact"]
-
 	return [best_value, best_move]
+
+
 	
+def iterative_deepening(theclass, alpha, beta, colour):
+	depth = 0
+	moves = theclass.available_moves()
+	centredmoves = []
+	if 4 in moves:
+		centredmoves.append(4)
+	if 3 in moves:
+		centredmoves.append(3)
+	if 5 in moves:
+		centredmoves.append(5)
+	if 2 in moves:
+		centredmoves.append(2)
+	if 6 in moves:
+		centredmoves.append(6)
+	if 1 in moves:
+		centredmoves.append(1)
+	if 7 in moves:
+		centredmoves.append(7)
+	best_move_so_far = centredmoves[0]
+	start_time = time.time()
+	while start_time - time.time() >= -12 and depth <= 20:
+		depth += 1
+		list_of_best_value_and_move = negamax(theclass, depth, alpha, beta, colour, best_move_so_far)
+		best_move_so_far = list_of_best_value_and_move[1]
+	return list_of_best_value_and_move
 
 twoai = input("Want to watch a game played by two AIs? Y or N?: ")
 
@@ -626,9 +654,9 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 0
-			aimove = negamax(bitted, 5, -float("Inf"), float("Inf"), 1)[1]
+			aimove = iterative_deepening(bitted, -float("Inf"), float("Inf"), 1)[1]
 			play.inputter(aimove)
-			print("\nNew AI with depth 10 dropped a piece in column {column}.".format(column=aimove))
+			print("\nNew AI with depth 5 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -641,9 +669,9 @@ if twoai.lower() == "y":
 			bitted = Bitboard(play.board)
 			bitted.get_position_and_mask()
 			bitted.turn = 1
-			aimove = negamax(bitted, 5, -float("Inf"), float("Inf"), -1)[1]
+			aimove = iterative_deepening(bitted, -float("Inf"), float("Inf"), -1)[1]
 			play.inputter(aimove)
-			print("\nNew AI with depth 10 dropped a piece in column {column}.".format(column=aimove))
+			print("\nNew AI with depth 5 dropped a piece in column {column}.".format(column=aimove))
 			play.checker()
 			if play.gameover == True and play.draw != True:
 				play.printer()
@@ -699,7 +727,7 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 1
-					aimove = negamax(bitted, 11, -float("Inf"), float("Inf"), -1)[1]
+					aimove = iterative_deepening(bitted, -float("Inf"), float("Inf"), -1)[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 11 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
@@ -717,7 +745,7 @@ elif twoai.lower() == "n":
 					bitted = Bitboard(play.board)
 					bitted.get_position_and_mask()
 					bitted.turn = 0
-					aimove = negamax(bitted, 9, -float("Inf"), float("Inf"), 1)[1]
+					aimove = iterative_deepening(bitted, -float("Inf"), float("Inf"), 1)[1]
 					play.inputter(aimove)
 					print("\nNew AI with depth 9 dropped a piece in column {column}.".format(column=aimove))
 					play.checker()
