@@ -136,7 +136,8 @@ class Bitboard:
 			self.mask = newmask
 			self.position_two = new_position_two
 
-	def shifter(self):
+	def evaluation_function(self):
+		
 		count = 0
 		bitmaps = [self.position_one, self.position_two]
 
@@ -618,7 +619,7 @@ def negamax(theclass, depth, alpha, beta, colour, best_move_so_far):
 	elif theclass.draw == True:
 		return [0, ""]
 	elif depth == 0:
-		return [theclass.shifter(), ""]
+		return [theclass.evaluation_function(), ""]
 
 	best_value = -float("Inf")
 	moves = theclass.available_moves()
