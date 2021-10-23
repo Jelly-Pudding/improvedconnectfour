@@ -387,68 +387,44 @@ class Bitboard:
 			m = maps & (maps >> 7)
 			if m & (m >> 14):
 				if maps == one_player:
-					if self.turn % 2 != 0:
-						self.xwin = 1
-					elif self.turn % 2 == 0:
-						self.owin = -1
+					self.xwin = 1
 					self.gameover = True
 					return
-				elif maps == other_player:
-					if self.turn % 2 != 0:
-						self.xwin = 1
-					elif self.turn % 2 == 0:
-						self.owin = -1
+				else:
+					self.owin = -1
 					self.gameover = True
 					return 
 			# Negative diagonal
 			m = maps & (maps >> 6)
 			if m & (m >> 12):
 				if maps == one_player:
-					if self.turn % 2 != 0:
-						self.xwin = 1
-					elif self.turn % 2 == 0:
-						self.owin = -1
+					self.xwin = 1
 					self.gameover = True
 					return
-				elif maps == other_player:
-					if self.turn % 2 != 0:
-						self.xwin = 1
-					elif self.turn % 2 == 0:
-						self.owin = -1
+				else:
+					self.owin = -1
 					self.gameover = True
 					return
 			# Positive diagonal
 			m = maps & (maps >> 8)
 			if m & (m >> 16):
 				if maps == one_player:
-					if self.turn % 2 != 0:
-						self.xwin = 1
-					elif self.turn % 2 == 0:
-						self.owin = -1
+					self.xwin = 1
 					self.gameover = True
 					return
-				elif maps == other_player:
-					if self.turn % 2 != 0:
-						self.xwin = 1
-					elif self.turn % 2 == 0:
-						self.owin = -1
+				else:
+					self.owin = -1
 					self.gameover = True
 					return
     			# Vertical
 			m = maps & (maps >> 1)
 			if m & (m >> 2):
 				if maps == one_player:
-					if self.turn % 2 != 0:
-						self.xwin = 1
-					elif self.turn % 2 == 0:
-						self.owin = -1
+					self.xwin = 1
 					self.gameover = True
 					return
-				elif maps == other_player:
-					if self.turn % 2 != 0:
-						self.xwin = 1
-					elif self.turn % 2 == 0:
-						self.owin = -1
+				else:
+					self.owin = -1
 					self.gameover = True
 					return
 		#checks for the draw
