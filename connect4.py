@@ -8,11 +8,11 @@ random.seed(42)
 
 transposition_dictionary = {}
 
-#creates 2d list (two-dimensional as there is a list for each player) containing long numbers. It goes to 47 because (for the bitboard) that is the largest index where pieces can be placed (top right position on the board) 
+#Creates a 2d list (two-dimensional as there is a list for each player) containing long numbers. It goes to 47 because (for the bitboard) that is the largest index where pieces can be placed (top right position on the board) 
 
 transposition_table = [[random.randrange(1,2**64 - 1) for cell in range(0, 48, 1)] for pieces in range(0,2,1)]
 
-#A function that uses the above two list and the placements of crosses and naughts on the bitboard to generate a hash 
+#A function that uses the above two-dimensional list and the placements of crosses and naughts on the bitboard to generate a hash 
 
 def compute_hash(position_one, position_two):
 	player1 = position_one
@@ -40,6 +40,8 @@ class Unbuffered(object):
        return getattr(self.stream, attr)
 sys.stdout = Unbuffered(sys.stdout)
 
+
+#Below lies the Bitboard class. To help one visualise the bitboard, the printer function can be used.
 
 class Bitboard:
 	turn = 0
@@ -75,20 +77,12 @@ class Bitboard:
 				else:
 					self.position_two += "0"
 		#This variable can be used for the class's printer function
-		self.mask_bytes = copy.deepcopy(self.mask)
 		self.position_one = int(self.position_one, 2)
 		self.position_two = int(self.position_two, 2)
 		self.mask = int(self.mask, 2)
 		self.hidden_row = int(self.hidden_row, 2)
 
 	def printer(self):
-		print(self.mask_bytes[1:7] + " row 7." + " The hidden row above the highest shown row has an index of 0.")
-		print(self.mask_bytes[8:14] + " row 6." + " The hidden row above the highest shown row has an index of 7.")
-		print(self.mask_bytes[15:21] + " row 5." + " The hidden row above the highest shown row has an index of 14.")
-		print(self.mask_bytes[22:28] + " row 4." + " The hidden row above the highest shown row has an index of 21.")
-		print(self.mask_bytes[29:35] + " row 3." + " The hidden row above the highest shown row has an index of 28.")
-		print(self.mask_bytes[36:42] + " row 2." + " The hidden row above the highest shown row has an index of 35.")
-		print(self.mask_bytes[43:49] + " row 1." + " The hidden row above the highest shown row has an index of 42.")
 		print("The mask:")
 		print(bin(2**48 + self.mask)[3:])
 		print("The hidden row:")
@@ -156,7 +150,7 @@ class Bitboard:
 
 		#vertical
 
-		for idx, maps in enumerate(bitmaps):
+		for idx in range(len(bitmaps)):
 			if idx == 0:
 				newposition = bitmaps[0]
 				otherposition = bitmaps[1]
@@ -173,6 +167,7 @@ class Bitboard:
 				#print("Shifted again:")
 				#print(bin(2**48 + newposition)[3:])
 				if idx == 0:
+					#There will be a one for every connect 3
 					number_of_three_columns = bin(2**48 + newposition)[3:].count("1")
 					count += number_of_three_columns
 				elif idx == 1:
@@ -196,7 +191,7 @@ class Bitboard:
 		
 		#horizontal checker
 
-		for idx, maps in enumerate(bitmaps):
+		for idx in range(len(bitmaps)):
 			if idx == 0:
 				newposition = bitmaps[0]
 				otherposition = bitmaps[1]
@@ -255,7 +250,7 @@ class Bitboard:
 		#positive diagonal
 
 		
-		for idx, maps in enumerate(bitmaps):
+		for idx in range(len(bitmaps)):
 			if idx == 0:
 				newposition = bitmaps[0]
 				otherposition = bitmaps[1]
@@ -300,7 +295,7 @@ class Bitboard:
 								elif idx == 1:
 									count += 1
 						except IndexError:
-							#There will be indices that yield an index error here, but they have been dealt with in other statements
+							#There will be indices that yield an index error here, but they have been dealt with in other if else statements 
 							pass	
 						#Indices where only one space will ever be available to form a connect four along a positive diagonal. (44 actually has no spaces, but it is accounted for below)
 						if index == 47 or index == 46 or index == 45 or index == 44 or index == 40 or index == 33 or index == 26 or index == 19:
@@ -317,7 +312,7 @@ class Bitboard:
 
 		#negative diagonal
 
-		for idx, maps in enumerate(bitmaps):
+		for idx in range(len(bitmaps)):
 			if idx == 0:
 				newposition = bitmaps[0]
 				otherposition = bitmaps[1]
@@ -385,7 +380,6 @@ class Bitboard:
 		return count
 	def connected_four(self):
 		one_player = self.position_one
-		mask = self.mask
 		other_player = self.position_two
 		bitmaps = [one_player, other_player]
 		for maps in bitmaps:
