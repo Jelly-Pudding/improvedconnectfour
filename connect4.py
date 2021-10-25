@@ -191,7 +191,6 @@ class Bitboard:
 		
 		#horizontal checker
 
-		for idx in range(len(bitmaps)):
 			if idx == 0:
 				newposition = bitmaps[0]
 				otherposition = bitmaps[1]
@@ -249,8 +248,6 @@ class Bitboard:
 
 		#positive diagonal
 
-		
-		for idx in range(len(bitmaps)):
 			if idx == 0:
 				newposition = bitmaps[0]
 				otherposition = bitmaps[1]
@@ -312,7 +309,6 @@ class Bitboard:
 
 		#negative diagonal
 
-		for idx in range(len(bitmaps)):
 			if idx == 0:
 				newposition = bitmaps[0]
 				otherposition = bitmaps[1]
@@ -652,7 +648,7 @@ def iterative_deepening(theclass, alpha, beta, colour):
 		centredmoves.append(7)
 	best_move_so_far = centredmoves[0]
 	start_time = time.time()
-	while start_time - time.time() >= -12 and depth <= 20:
+	while start_time - time.time() >= -10 and depth <= 20:
 		depth += 1
 		list_of_best_value_and_move = negamax(theclass, depth, alpha, beta, colour, best_move_so_far)
 		best_move_so_far = list_of_best_value_and_move[1]
